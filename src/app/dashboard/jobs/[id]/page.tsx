@@ -286,9 +286,12 @@ export default function JobDetailPage() {
 
             {/* Action Buttons */}
             <div className="space-y-3">
-              <button className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+              <Link
+                href={`/dashboard/optimize/${job.id}`}
+                className="block w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-center"
+              >
                 🔧 Optimize Resume for This Job
-              </button>
+              </Link>
               <a
                 href={job.apply_url}
                 target="_blank"
