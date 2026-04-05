@@ -1,42 +1,49 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
+import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
 /**
- * Logout Utility
+ * Logout Hook
  *
- * Signs the user out and redirects to the landing page.
+ * Custom hook for handling user logout.
+ * Use this in Client Components.
  *
- * Usage in Client Components:
+ * Usage:
  * ```tsx
  * 'use client'
- * import { logout } from '@/lib/auth/logout'
+ * import { useLogout } from '@/lib/auth/logout'
  *
- * export default function LogoutButton() {
- *   return (
- *     <button onClick={logout}>Sign out</button>
- *   )
+ * export default function MyComponent() {
+ *   const { logout, isLoggingOut } = useLogout()
+ *   return <button onClick={logout} disabled={isLoggingOut}>Sign out</button>
  * }
  * ```
  */
-export async function logout() {
-  const supabase = createClient()
+export function useLogout() {
   const router = useRouter()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
-  try {
-    // Sign out from Supabase
-    await supabase.auth.signOut()
+  const logout = useCallback(async () => {
+    setIsLoggingOut(true)
+    const supabase = createClient()
 
-    // Redirect to landing page
-    router.push('/')
-    router.refresh()
-  } catch (error) {
-    console.error('Logout error:', error)
-    // Still redirect even if logout fails
-    router.push('/')
-    router.refresh()
-  }
+    try {
+      // Sign out from Supabase
+      await supabase.auth.signOut()
+    } catch (error) {
+      console.error('Logout error:', error)
+      // Still redirect even if logout fails
+    } finally {
+      // Redirect to landing page
+      router.push('/')
+      router.refresh()
+      setIsLoggingOut(false)
+    }
+  }, [router])
+
+  return { logout, isLoggingOut }
 }
 
 /**
@@ -45,12 +52,15 @@ export async function logout() {
  * A pre-styled logout button for easy use.
  */
 export function LogoutButton({ className = '' }: { className?: string }) {
+  const { logout, isLoggingOut } = useLogout()
+
   return (
     <button
       onClick={logout}
-      className={`text-sm text-slate-600 hover:text-slate-900 transition-colors ${className}`}
+      disabled={isLoggingOut}
+      className={`text-sm text-slate-600 hover:text-slate-900 transition-colors disabled:opacity-50 ${className}`}
     >
-      Sign out
+      {isLoggingOut ? 'Signing out...' : 'Sign out'}
     </button>
   )
 }

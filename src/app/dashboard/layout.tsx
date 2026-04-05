@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { logout } from '@/lib/auth/logout'
+import { LogoutButton } from '@/lib/auth/logout'
 
 /**
  * Dashboard Layout Component
@@ -108,12 +108,7 @@ export default function DashboardLayout({
               <p className="text-sm font-medium truncate">{userEmail}</p>
             </div>
           </div>
-          <button
-            onClick={logout}
-            className="w-full px-4 py-2 text-left text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-          >
-            Sign out
-          </button>
+          <LogoutButton className="w-full px-4 py-2 text-left text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" />
         </div>
       </aside>
 
