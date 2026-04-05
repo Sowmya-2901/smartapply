@@ -415,8 +415,10 @@ export function tagJobDescription(descriptionText: string): TaggedJob {
   for (const skill of skillKeys) {
     const synonyms = SKILL_SYNONYMS[skill]
     for (const synonym of synonyms) {
+      // Escape special regex characters in the synonym name
+      const escapedSynonym = synonym.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
       // Use word boundary matching to avoid partial matches
-      const regex = new RegExp(`\\b${synonym.toLowerCase()}\\b`, 'i')
+      const regex = new RegExp(`\\b${escapedSynonym.toLowerCase()}\\b`, 'i')
       if (regex.test(text)) {
         if (!extractedSkills.includes(skill)) {
           extractedSkills.push(skill)

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { fetchGreenhouseJobs } from '@/lib/ats/greenhouse'
 import { fetchLeverJobs } from '@/lib/ats/lever'
@@ -21,7 +21,7 @@ import { detectStaffingAgency } from '@/lib/filters/staffingDetector'
  * Can be triggered manually via browser or cron job
  */
 export async function GET(request: Request) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const startTime = Date.now()
   let newJobs = 0
@@ -37,8 +37,9 @@ export async function GET(request: Request) {
       .eq('verified', true)
 
     if (companiesError || !companies) {
+      console.error('Companies fetch error:', companiesError)
       return NextResponse.json(
-        { success: false, error: 'Failed to fetch companies' },
+        { success: false, error: 'Failed to fetch companies', details: companiesError },
         { status: 500 }
       )
     }
