@@ -16,7 +16,7 @@ export default function SettingsPage() {
   // Form states
   const [jobTitles, setJobTitles] = useState('')
   const [locations, setLocations] = useState('')
-  const [remoteOnly, setRemoteOnly] = useState(false)
+  const [remotePreference, setRemotePreference] = useState<string>('any')
   const [minSalary, setMinSalary] = useState('')
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export default function SettingsPage() {
       if (profile) {
         setJobTitles((profile.job_titles || []).join(', '))
         setLocations((profile.locations || []).join(', '))
-        setRemoteOnly(profile.remote_only || false)
+        setRemotePreference(profile.remote_preference || 'any')
         setMinSalary(profile.min_salary?.toString() || '')
       }
 
@@ -61,16 +61,16 @@ export default function SettingsPage() {
       .update({
         job_titles: jobTitles.split(',').map(t => t.trim()).filter(Boolean),
         locations: locations.split(',').map(l => l.trim()).filter(Boolean),
-        remote_only: remoteOnly,
+        remote_preference: remotePreference,
         min_salary: minSalary ? parseInt(minSalary) : null,
-        updated_at: new Date().toISOString(),
       })
       .eq('id', user?.id)
 
     setSaving(false)
 
     if (error) {
-      setMessage({ type: 'error', text: 'Failed to save preferences' })
+      console.error('Error saving preferences:', error)
+      setMessage({ type: 'error', text: error.message || 'Failed to save preferences' })
     } else {
       setMessage({ type: 'success', text: 'Preferences saved successfully' })
     }
@@ -199,15 +199,19 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={remoteOnly}
-                  onChange={(e) => setRemoteOnly(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
-                />
-                <span className="text-sm text-slate-700">Remote positions only</span>
-              </label>
+              <label htmlFor="remotePreference" className="block text-sm font-medium text-slate-700 mb-1">Remote Preference</label>
+              <select
+                id="remotePreference"
+                value={remotePreference}
+                onChange={(e) => setRemotePreference(e.target.value)}
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="any">Any (remote, hybrid, or onsite)</option>
+                <option value="remote">Remote only</option>
+                <option value="hybrid">Hybrid (remote + onsite)</option>
+                <option value="onsite">Onsite only</option>
+              </select>
+              <p className="text-xs text-slate-500 mt-1">Filter jobs by work arrangement</p>
             </div>
 
             <div>
