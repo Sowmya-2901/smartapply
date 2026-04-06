@@ -14,94 +14,112 @@ export async function generateDocxFromText(resumeText: string, filename: string 
   // Parse the resume text into sections
   const sections = parseResumeSections(resumeText)
 
+  // Build children array explicitly to avoid type issues
+  const children: any[] = []
+
+  // Header section (name, contact info)
+  for (const para of sections.header) {
+    children.push(new Paragraph({
+      text: para,
+      heading: HeadingLevel.HEADING_1,
+      alignment: AlignmentType.CENTER,
+    }))
+  }
+
+  // Contact info (smaller, centered)
+  if (sections.contact) {
+    children.push(new Paragraph({
+      text: sections.contact,
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 200 },
+    }))
+  }
+
+  // Add some spacing after header
+  children.push(new Paragraph({
+    text: '',
+    spacing: { after: 200 },
+  }))
+
+  // Summary section
+  for (const para of sections.summary) {
+    children.push(new Paragraph({ text: para }))
+  }
+
+  // Skills section
+  for (let idx = 0; idx < sections.skills.length; idx++) {
+    const para = sections.skills[idx]
+    children.push(new Paragraph({
+      text: para,
+      ...(idx > 0 ? { bullet: { level: 0 } } : {})
+    }))
+  }
+
+  // Experience section
+  for (let idx = 0; idx < sections.experience.length; idx++) {
+    const exp = sections.experience[idx]
+    if (idx > 0) {
+      children.push(new Paragraph({
+        text: '',
+        spacing: { after: 100 },
+      }))
+    }
+    children.push(new Paragraph({
+      text: exp.title,
+      heading: HeadingLevel.HEADING_2,
+    }))
+    children.push(new Paragraph({
+      text: exp.company || '',
+    }))
+    for (const bullet of exp.bullets) {
+      children.push(new Paragraph({
+        text: bullet,
+        bullet: { level: 0 },
+      }))
+    }
+  }
+
+  // Projects section
+  for (let idx = 0; idx < sections.projects.length; idx++) {
+    const proj = sections.projects[idx]
+    if (idx > 0) {
+      children.push(new Paragraph({
+        text: '',
+        spacing: { after: 100 },
+      }))
+    }
+    children.push(new Paragraph({
+      text: proj.title,
+      heading: HeadingLevel.HEADING_2,
+    }))
+    for (const bullet of proj.bullets) {
+      children.push(new Paragraph({
+        text: bullet,
+        bullet: { level: 0 },
+      }))
+    }
+  }
+
+  // Education section
+  for (const edu of sections.education) {
+    children.push(new Paragraph({
+      text: edu.school,
+      heading: HeadingLevel.HEADING_2,
+    }))
+    children.push(new Paragraph({
+      text: [edu.degree, edu.year].filter(Boolean).join(' | '),
+    }))
+    children.push(new Paragraph({
+      text: '',
+      spacing: { after: 200 },
+    }))
+  }
+
   // Create a new document
   const doc = new Document({
     sections: [{
       properties: {},
-      children: [
-        // Header section (name, contact info)
-        ...sections.header.map(para => new Paragraph({
-          text: para,
-          heading: HeadingLevel.HEADING_1,
-          alignment: AlignmentType.CENTER,
-        })),
-
-        // Contact info (smaller, centered)
-        sections.contact ? new Paragraph({
-          text: sections.contact,
-          alignment: AlignmentType.CENTER,
-          spacing: {
-            after: 200,
-          },
-        }) : undefined,
-
-        // Add some spacing after header
-        new Paragraph({
-          text: '',
-          spacing: { after: 200 },
-        }),
-
-        // Summary section
-        ...sections.summary.map(para => new Paragraph({
-          text: para,
-        })),
-
-        // Skills section
-        ...sections.skills.map((para, idx) => new Paragraph({
-          text: para,
-          bullet: idx > 0 ? { level: 'bullet' } : undefined,
-        })),
-
-        // Experience section
-        ...sections.experience.flatMap((exp, idx) => [
-          idx > 0 ? new Paragraph({
-            text: '',
-            spacing: { after: 100 },
-          }) : undefined,
-          new Paragraph({
-            text: exp.title,
-            heading: HeadingLevel.HEADING_2,
-          }),
-          new Paragraph({
-            text: exp.company || '',
-          }),
-          ...exp.bullets.map(bullet => new Paragraph({
-            text: bullet,
-            bullet: { level: 'bullet' },
-          })),
-        ].filter(Boolean)),
-
-        // Projects section
-        ...sections.projects.flatMap((proj, idx) => [
-          idx > 0 ? new Paragraph({
-            text: '',
-            spacing: { after: 100 },
-          }) : undefined,
-          new Paragraph({
-            text: proj.title,
-            heading: HeadingLevel.HEADING_2,
-          }),
-          ...proj.bullets.map(bullet => new Paragraph({
-            text: bullet,
-            bullet: { level: 'bullet' },
-          })),
-        ].filter(Boolean)),
-
-        // Education section
-        ...sections.education.map(edu => [
-          new Paragraph({
-            text: edu.school,
-            heading: HeadingLevel.HEADING_2,
-          }),
-          new Paragraph({
-            text: [edu.degree, edu.year].filter(Boolean).join(' | '),
-          }),
-          new Paragraph({
-            text: '',
-            spacing: { after: 200 },
-          }),
-        ]),
-      ].filter(Boolean),
+      children,
     }],
   })
 
@@ -118,6 +136,7 @@ export async function downloadResumeDocx(resumeText: string, filename: string = 
   const buffer = await generateDocxFromText(resumeText, filename)
 
   // Create blob and download
+  // @ts-ignore - Buffer type compatibility issue with Blob
   const blob = new Blob([buffer], {
     type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   })
@@ -156,7 +175,7 @@ function parseResumeSections(text: string) {
     education: [],
   }
 
-  let currentSection: 'header' | 'summary' | 'skills' | 'experience' | 'projects' | 'education' | null = null
+  let currentSection: 'header' | 'summary' | 'skills' | 'experience' | 'projects' | 'education' | null = 'header'
   let currentExperience: { title: string; company: string; bullets: string[] } | null = null
   let currentProject: { title: string; bullets: string[] } | null = null
   let currentEducation: { school: string; degree: string; year: string } | null = null

@@ -29,7 +29,7 @@ export default function DashboardLayout({
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        setUserEmail(user.email)
+        setUserEmail(user.email || null)
       }
     }
     loadUser()

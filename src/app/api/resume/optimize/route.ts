@@ -147,7 +147,7 @@ Also return a JSON summary at the end with this format:
 
     // Extract the JSON summary from the response
     let changeSummary = null
-    const jsonMatch = optimizedText.match(/\{[^}]*"changes_summary"[^}]*\}|\{[^}]*"skills_added"[^}]*\}/s)
+    const jsonMatch = optimizedText.match(/\{[\s\S]*?"changes_summary"[\s\S]*?\}|\{[\s\S]*?"skills_added"[\s\S]*?\}/)
     if (jsonMatch) {
       try {
         changeSummary = JSON.parse(jsonMatch[0])
@@ -160,7 +160,7 @@ Also return a JSON summary at the end with this format:
     let savedResume = null
     if (mode === 'master') {
       // Remove any JSON summary from the text for storage
-      const cleanText = optimizedText.replace(/\{[^}]*"changes_summary"[^}]*\}|\{[^}]*"skills_added"[^}]*\}/s, '').trim()
+      const cleanText = optimizedText.replace(/\{[\s\S]*?"changes_summary"[\s\S]*?\}|\{[\s\S]*?"skills_added"[\s\S]*?\}/g, '').trim()
 
       const { data } = await supabase
         .from('resumes')

@@ -9,7 +9,13 @@
 // FILTER DEFINITIONS
 // ============================================================================
 
-export const FILTER_DEFINITIONS = {
+interface FilterConfig {
+  action: string
+  match_any: string[]
+  exclude_if_also_contains?: string[]
+}
+
+export const FILTER_DEFINITIONS: Record<string, FilterConfig> = {
   /**
    * Phrases indicating US citizenship/clearance requirements
    * Tag: 'requires_us_citizenship'
@@ -284,7 +290,6 @@ export const SKILL_SYNONYMS: Record<string, string[]> = {
   'Java': ['Java', 'J2EE', 'JDK', 'JVM'],
   'C++': ['C++', 'CPP', 'Cplus', 'C plus plus'],
   'C#': ['C#', 'Csharp', 'C sharp', 'C Sharp'],
-  'Python': ['Python', 'Py'],
   'Ruby': ['Ruby', 'Ruby on Rails', 'Rails'],
   'PHP': ['PHP', 'Hypertext Preprocessor'],
   'Swift': ['Swift', 'SwiftUI'],
@@ -347,8 +352,7 @@ export const SKILL_SYNONYMS: Record<string, string[]> = {
   'JUnit': ['JUnit', 'junit'],
   'TestNG': ['TestNG', 'testng'],
   'NUnit': ['NUnit', 'nunit'],
-  'pytest': ['pytest', 'py-test'],
-  'JUnit': ['JUnit', 'junit', 'unit testing']
+  'pytest': ['pytest', 'py-test']
 }
 
 // ============================================================================

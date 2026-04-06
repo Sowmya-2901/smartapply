@@ -24,6 +24,13 @@ interface JobCardProps {
   mockMatchScore: number
 }
 
+interface Stats {
+  newToday: number
+  applied: number
+  saved: number
+  avgMatch: number
+}
+
 // Server Action to fetch jobs
 async function getJobs(limit: number = 50): Promise<{ jobs: Job[]; stats: Stats }> {
   'use server'
@@ -81,7 +88,7 @@ export default async function JobFeedPage({
   // Generate mock match scores for demo (TODO: use real match scores from user_job_matches)
   const jobsWithScores: JobCardProps[] = jobs.map((job: Job) => ({
     job,
-    mockMatchScore: Math.floor(Math.random() * 30) + 70) // 70-99
+    mockMatchScore: Math.floor(Math.random() * 30) + 70 // 70-99
   }))
 
   return (
@@ -266,8 +273,7 @@ export default async function JobFeedPage({
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )})}
         </div>
       )}
     </div>

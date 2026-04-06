@@ -104,7 +104,7 @@ export async function GET(request: Request) {
     if (allExternalIds.size > 0) {
       const { data: staleJobs } = await supabase
         .from('jobs')
-        .select('id')
+        .select('id, company_id, external_id')
         .eq('is_active', true)
 
       if (staleJobs) {

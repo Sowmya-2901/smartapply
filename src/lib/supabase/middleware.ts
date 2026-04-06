@@ -21,15 +21,13 @@ export async function updateSession(request: NextRequest) {
     {
       cookies: {
         getAll() {
-          return Object.fromEntries(
-            request.cookies.getAll().map((c) => [c.name, c.value])
-          )
+          return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            request.cookies.set(name, value),
+          cookiesToSet.forEach(({ name, value, options }) => {
+            request.cookies.set(name, value)
             supabaseResponse.cookies.set(name, value, options)
-          )
+          })
         },
       },
     }

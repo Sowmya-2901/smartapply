@@ -67,10 +67,11 @@ export async function POST(request: Request) {
     const fileExt = fileName.split('.').pop()?.toLowerCase()
 
     if (fileExt === 'pdf') {
-      // Parse PDF
+      // Parse PDF - try the main export from pdf-parse
       try {
-        const pdfParse = (await import('pdf-parse')).default
-        const pdfData = await pdfParse(buffer)
+        // Use require for pdf-parse as it has compatibility issues with ESM
+        const pdfParse = (await import('pdf-parse')) as any
+        const pdfData = await pdfParse.default ? await pdfParse.default(buffer) : await pdfParse(buffer)
         parsedText = pdfData.text
       } catch (err) {
         console.error('PDF parsing error:', err)
