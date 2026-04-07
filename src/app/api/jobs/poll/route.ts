@@ -5,6 +5,7 @@ import { fetchLeverJobs } from '@/lib/ats/lever'
 import { fetchAshbyJobs } from '@/lib/ats/ashby'
 import { tagJobDescription } from '@/lib/filters/synonyms'
 import { detectStaffingAgency } from '@/lib/filters/staffingDetector'
+import { normalizeForDedup } from '@/lib/utils/dedup'
 
 /**
  * Job Polling API Route
@@ -181,7 +182,22 @@ async function processJobs(
       const externalId = `${company.id}:${job.externalId}`
       allExternalIds.add(externalId)
 
-      // Check if job already exists
+      // Calculate dedup key FIRST (before any database queries)
+      const dedupKey = normalizeForDedup(company.name, job.title, job.location)
+
+      // Check for duplicate by dedup_key (catches same job from different sources)
+      const { data: existingByDedup } = await supabase
+        .from('jobs')
+        .select('id')
+        .eq('dedup_key', dedupKey)
+        .maybeSingle()
+
+      if (existingByDedup) {
+        // Duplicate detected by company+title+location, skip this job
+        continue
+      }
+
+      // Check if job already exists by external_id
       const { data: existingJob } = await supabase
         .from('jobs')
         .select('id, is_active')
@@ -199,6 +215,7 @@ async function processJobs(
       const jobData = {
         company_id: company.id,
         external_id: job.externalId,
+        dedup_key: dedupKey,
         title: job.title,
         description_html: job.descriptionHtml,
         description_text: job.descriptionText,

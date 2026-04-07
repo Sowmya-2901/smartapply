@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS jobs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
   external_id TEXT NOT NULL,             -- Job ID from ATS API
+  dedup_key TEXT,                        -- Normalized company::title::location for dedup
   title TEXT NOT NULL,
   description_html TEXT,                  -- Raw HTML from API
   description_text TEXT,                  -- Cleaned plain text
@@ -68,7 +69,8 @@ CREATE TABLE IF NOT EXISTS jobs (
   updated_at TIMESTAMPTZ DEFAULT now(),
 
   -- Prevent duplicate jobs from the same company
-  UNIQUE (company_id, external_id)
+  UNIQUE (company_id, external_id),
+  UNIQUE (dedup_key)                     -- Prevent duplicate jobs across sources
 );
 
 -- Indexes for jobs
@@ -77,6 +79,7 @@ CREATE INDEX IF NOT EXISTS idx_jobs_is_active ON jobs(is_active);
 CREATE INDEX IF NOT EXISTS idx_jobs_discovered_at ON jobs(discovered_at DESC);
 CREATE INDEX IF NOT EXISTS idx_jobs_filter_tags ON jobs USING GIN(filter_tags);
 CREATE INDEX IF NOT EXISTS idx_jobs_employment_type ON jobs(employment_type);
+CREATE INDEX IF NOT EXISTS idx_jobs_company_title_location ON jobs(company_id, title, location);
 
 -- ============================================================================
 -- TABLE: profiles

@@ -1,6 +1,8 @@
 import { formatDistanceToNow } from 'date-fns'
 import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
+import { calculateMatchScore } from '@/lib/filters/synonyms'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -17,11 +19,14 @@ interface Job {
   salary_max: number | null
   discovered_at: string
   apply_url: string
+  required_skills: string[] | null
+  parsed_experience_years: number | null
 }
 
 interface JobCardProps {
   job: Job
-  mockMatchScore: number
+  matchScore: number | null
+  userHasResume: boolean
 }
 
 interface Stats {
@@ -32,11 +37,48 @@ interface Stats {
 }
 
 // Server Action to fetch jobs
-async function getJobs(limit: number = 50): Promise<{ jobs: Job[]; stats: Stats }> {
+async function getJobs(limit: number = 50): Promise<{
+  jobs: Job[]
+  stats: Stats
+  userHasResume: boolean
+  matchScores: Map<string, number>
+}> {
   'use server'
   const supabase = createAdminClient()
+  const userSupabase = await createClient()
 
-  // Fetch jobs
+  // Get current user
+  const { data: { user } } = await userSupabase.auth.getUser()
+
+  // Check if user has a resume and get their skills
+  let userHasResume = false
+  let userSkills: string[] = []
+  let userExperience = 0
+
+  if (user) {
+    const { data: resume } = await userSupabase
+      .from('resumes')
+      .select('parsed_skills')
+      .eq('user_id', user.id)
+      .eq('type', 'raw_base')
+      .maybeSingle()
+
+    if (resume?.parsed_skills) {
+      userHasResume = true
+      userSkills = resume.parsed_skills
+    }
+
+    // Get user's experience
+    const { data: profile } = await userSupabase
+      .from('profiles')
+      .select('experience_years')
+      .eq('id', user.id)
+      .single()
+
+    userExperience = profile?.experience_years || 0
+  }
+
+  // Fetch jobs with required skills
   const { data: jobs } = await supabase
     .from('jobs')
     .select(`
@@ -47,7 +89,9 @@ async function getJobs(limit: number = 50): Promise<{ jobs: Job[]; stats: Stats 
       salary_min,
       salary_max,
       discovered_at,
-      apply_url
+      apply_url,
+      required_skills,
+      parsed_experience_years
     `)
     .eq('is_active', true)
     .order('discovered_at', { ascending: false })
@@ -63,16 +107,67 @@ async function getJobs(limit: number = 50): Promise<{ jobs: Job[]; stats: Stats 
     .gte('discovered_at', today.toISOString())
     .eq('is_active', true)
 
+  // Calculate or fetch match scores for each job
+  const matchScores = new Map<string, number>()
+
+  if (user && userHasResume && jobs) {
+    // Try to fetch cached match scores first
+    const { data: cachedMatches } = await userSupabase
+      .from('user_job_matches')
+      .select('job_id, match_score')
+      .eq('user_id', user.id)
+
+    // Create a map of cached scores
+    const cachedMap = new Map(
+      cachedMatches?.map(m => [m.job_id, m.match_score]) || []
+    )
+
+    // Calculate scores for jobs without cached data
+    for (const job of jobs) {
+      if (cachedMap.has(job.id)) {
+        matchScores.set(job.id, cachedMap.get(job.id)!)
+      } else if (userSkills.length > 0 && job.required_skills && job.required_skills.length > 0) {
+        // Calculate on-the-fly
+        const result = calculateMatchScore(
+          userSkills,
+          job.required_skills || [],
+          { experience_years: userExperience },
+          {
+            parsed_experience_years: job.parsed_experience_years || undefined,
+            location: job.location || undefined,
+            remote_type: job.remote_type || undefined,
+            title: job.title
+          }
+        )
+        matchScores.set(job.id, result.score)
+      } else {
+        // No skills data, set to null
+        matchScores.set(job.id, 0) // Will be treated as "no score"
+      }
+    }
+  }
+
+  // Calculate average match
+  let avgMatch = 0
+  if (matchScores.size > 0) {
+    const validScores = Array.from(matchScores.values()).filter(s => s > 0)
+    avgMatch = validScores.length > 0
+      ? Math.round(validScores.reduce((a, b) => a + b, 0) / validScores.length)
+      : 0
+  }
+
   const stats = {
     newToday: newTodayCount || 0,
-    applied: 0, // TODO: Query applications table
-    saved: 0, // TODO: Query saved jobs
-    avgMatch: 75 // TODO: Calculate from user_job_matches
+    applied: 0,
+    saved: 0,
+    avgMatch
   }
 
   return {
-    jobs: jobs || [],
-    stats
+    jobs: (jobs || []) as Job[],
+    stats,
+    userHasResume,
+    matchScores
   }
 }
 
@@ -83,16 +178,36 @@ export default async function JobFeedPage({
     search?: string
   }
 }) {
-  const { jobs, stats } = await getJobs()
+  const { jobs, stats, userHasResume, matchScores } = await getJobs()
 
-  // Generate mock match scores for demo (TODO: use real match scores from user_job_matches)
+  // Attach match scores to jobs
   const jobsWithScores: JobCardProps[] = jobs.map((job: Job) => ({
     job,
-    mockMatchScore: Math.floor(Math.random() * 30) + 70 // 70-99
+    matchScore: matchScores.get(job.id) ?? null,
+    userHasResume
   }))
 
   return (
     <div className="max-w-7xl mx-auto">
+      {/* Resume Prompt Banner - shown only if user doesn't have a resume */}
+      {!userHasResume && (
+        <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">📄</span>
+            <div>
+              <p className="font-medium text-amber-900">Upload your resume to see your match scores</p>
+              <p className="text-sm text-amber-700">We'll analyze your skills and show how well you match each job</p>
+            </div>
+          </div>
+          <Link
+            href="/onboarding"
+            className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium text-sm"
+          >
+            Complete Onboarding
+          </Link>
+        </div>
+      )}
+
       {/* Stats Bar */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
@@ -137,7 +252,7 @@ export default async function JobFeedPage({
               <span className="text-lg">📊</span>
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-900">{stats.avgMatch}%</p>
+              <p className="text-2xl font-bold text-slate-900">{userHasResume ? stats.avgMatch : '--'}%</p>
               <p className="text-sm text-slate-500">Avg Match</p>
             </div>
           </div>
@@ -148,7 +263,7 @@ export default async function JobFeedPage({
       <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 mb-6">
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-s-700">Match:</label>
+            <label className="text-sm font-medium text-slate-700">Match:</label>
             <div className="flex gap-2">
               <Link href="?match=60" className="px-3 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors text-sm">60%+</Link>
               <Link href="?match=70" className="px-3 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors text-sm">70%+</Link>
@@ -182,14 +297,17 @@ export default async function JobFeedPage({
         </div>
       ) : (
         <div className="space-y-4">
-          {jobsWithScores.map(({ job, mockMatchScore }: JobCardProps) => {
-            const matchColor = mockMatchScore >= 90
+          {jobsWithScores.map(({ job, matchScore, userHasResume }: JobCardProps) => {
+            const displayScore = userHasResume ? matchScore : null
+            const matchColor = displayScore && displayScore >= 90
               ? 'bg-green-100 text-green-800 border-green-200'
-              : mockMatchScore >= 70
+              : displayScore && displayScore >= 70
               ? 'bg-blue-100 text-blue-800 border-blue-200'
-              : mockMatchScore >= 60
+              : displayScore && displayScore >= 60
               ? 'bg-yellow-100 text-yellow-800 border-yellow-200'
-              : 'bg-gray-100 text-gray-800 border-gray-200'
+              : displayScore && displayScore > 0
+              ? 'bg-gray-100 text-gray-800 border-gray-200'
+              : 'bg-slate-100 text-slate-500 border-slate-200'
 
             const remoteBadge = job.remote_type === 'remote'
               ? '🏠️ Remote'
@@ -205,8 +323,8 @@ export default async function JobFeedPage({
 
             const timeAgo = formatDistanceToNow(new Date(job.discovered_at), { addSuffix: true })
 
-            // Mock skill tags (TODO: extract from actual job skills)
-            const skillTags = ['React', 'TypeScript', 'Node.js']
+            // Use real skill tags from job requirements
+            const skillTags = job.required_skills?.slice(0, 5) || []
 
             return (
               <div
@@ -216,7 +334,11 @@ export default async function JobFeedPage({
                 <div className="flex flex-col lg:flex-row lg:items-start gap-4">
                   {/* Match Score Badge */}
                   <div className={`px-3 py-1 rounded-full text-sm font-semibold border ${matchColor} w-fit lg:w-auto mb-2`}>
-                    ⭐ {mockMatchScore}% Match
+                    {displayScore !== null ? (
+                      <>⭐ {displayScore}% Match</>
+                    ) : (
+                      <>⭐ --% Match</>
+                    )}
                   </div>
 
                   {/* Job Content */}
@@ -235,13 +357,20 @@ export default async function JobFeedPage({
                     )}
 
                     {/* Skill tags */}
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {skillTags.map(skill => (
-                        <span key={skill} className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
+                    {skillTags.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {skillTags.map(skill => (
+                          <span key={skill} className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
+                            {skill}
+                          </span>
+                        ))}
+                        {job.required_skills && job.required_skills.length > 5 && (
+                          <span className="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded">
+                            +{job.required_skills.length - 5} more
+                          </span>
+                        )}
+                      </div>
+                    )}
 
                     <p className="text-sm text-slate-500 mb-4">
                       Posted {timeAgo}
@@ -257,7 +386,12 @@ export default async function JobFeedPage({
                       </Link>
                       <Link
                         href={`/dashboard/optimize/${job.id}`}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                        className={`px-4 py-2 rounded-lg transition-colors text-sm font-medium ${
+                          userHasResume
+                            ? 'bg-blue-600 text-white hover:bg-blue-700'
+                            : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                        }`}
+                        aria-disabled={!userHasResume}
                       >
                         Optimize Resume
                       </Link>
