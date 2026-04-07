@@ -54,6 +54,7 @@ async function getJobs(limit: number = 50): Promise<{
   let userHasResume = false
   let userSkills: string[] = []
   let userExperience = 0
+  let userJobTitles: string[] = []
 
   if (user) {
     const { data: resume } = await userSupabase
@@ -68,14 +69,15 @@ async function getJobs(limit: number = 50): Promise<{
       userSkills = resume.parsed_skills
     }
 
-    // Get user's experience
+    // Get user's experience and job titles
     const { data: profile } = await userSupabase
       .from('profiles')
-      .select('experience_years')
+      .select('experience_years, job_titles')
       .eq('id', user.id)
       .single()
 
     userExperience = profile?.experience_years || 0
+    userJobTitles = profile?.job_titles || []
   }
 
   // Fetch jobs with required skills
@@ -131,7 +133,7 @@ async function getJobs(limit: number = 50): Promise<{
         const result = calculateMatchScore(
           userSkills,
           job.required_skills || [],
-          { experience_years: userExperience },
+          { experience_years: userExperience, job_titles: userJobTitles },
           {
             parsed_experience_years: job.parsed_experience_years || undefined,
             location: job.location || undefined,

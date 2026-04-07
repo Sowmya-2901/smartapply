@@ -5,6 +5,8 @@
  * This runs ONCE per job when it's first ingested, not at query time.
  */
 
+import { calculateTitleMatchScore } from '../utils/titleMatch'
+
 // ============================================================================
 // FILTER DEFINITIONS
 // ============================================================================
@@ -469,9 +471,9 @@ export function normalizeSkill(skill: string): string {
 export function calculateMatchScore(
   userSkills: string[],
   jobSkills: string[],
-  userProfile: { experience_years?: number },
+  userProfile: { experience_years?: number; job_titles?: string[] },
   job: { parsed_experience_years?: number; location?: string; remote_type?: string; title?: string }
-): { score: number; breakdown: { skills: number; experience: number; location: number; title: number } } {
+): { score: number; breakdown: { skills: number; experience: number; location: number; title: number; salary: number }; gate_failed: 'skills' | 'title' | null } {
   // Normalize both skill sets
   const normalizedUserSkills = userSkills.map(s => normalizeSkill(s).toLowerCase())
   const normalizedJobSkills = jobSkills.map(s => normalizeSkill(s).toLowerCase())
@@ -481,6 +483,11 @@ export function calculateMatchScore(
   const matchedSkills = uniqueJobSkills.filter(s => normalizedUserSkills.includes(s.toLowerCase()))
   const skillScore = uniqueJobSkills.length > 0
     ? (matchedSkills.length / uniqueJobSkills.length) * 50
+    : 0
+
+  // Calculate skill percentage for gate-pass check
+  const skillPercentage = uniqueJobSkills.length > 0
+    ? (matchedSkills.length / uniqueJobSkills.length) * 100
     : 0
 
   // Calculate experience match (20% weight)
@@ -498,21 +505,46 @@ export function calculateMatchScore(
   // Location match (10% weight) - simplified for now
   const locationScore = 10 // Assume match for now
 
-  // Title match (10% weight) - simplified for now
-  const titleScore = 10 // Assume match for now
+  // Title match (10% weight) - use actual title matching
+  let titleScore = 10 // Default neutral score
+  if (job.title && userProfile.job_titles && userProfile.job_titles.length > 0) {
+    const titleMatch = calculateTitleMatchScore(userProfile.job_titles, job.title)
+    titleScore = titleMatch.score
+  }
 
   // Salary match (10% weight) - simplified for now
   const salaryScore = 10 // Assume match for now
 
-  const totalScore = Math.round(skillScore + experienceScore + locationScore + titleScore + salaryScore)
+  // Calculate base score
+  let baseScore = Math.round(skillScore + experienceScore + locationScore + titleScore + salaryScore)
+  baseScore = Math.min(100, Math.max(0, baseScore))
+
+  // GATE-PASS CHECK
+  let gateFailed: 'skills' | 'title' | null = null
+  let finalScore = baseScore
+
+  // Gate 1: Skills (40% threshold)
+  // If user has less than 40% of required skills, cap at 35%
+  if (skillPercentage < 40) {
+    finalScore = Math.min(35, baseScore)
+    gateFailed = 'skills'
+  }
+  // Gate 2: Title (30% threshold = 3 out of 10 points)
+  // If title match is very poor, cap at 40%
+  else if (titleScore < 3) {
+    finalScore = Math.min(40, baseScore)
+    gateFailed = 'title'
+  }
 
   return {
-    score: Math.min(100, Math.max(0, totalScore)),
+    score: finalScore,
     breakdown: {
       skills: Math.round(skillScore),
       experience: experienceScore,
       location: locationScore,
-      title: titleScore
-    }
+      title: titleScore,
+      salary: salaryScore
+    },
+    gate_failed: gateFailed
   }
 }

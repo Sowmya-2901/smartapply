@@ -185,6 +185,8 @@ CREATE TABLE IF NOT EXISTS user_job_matches (
   job_id UUID NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
   match_score INTEGER NOT NULL CHECK (match_score >= 0 AND match_score <= 100),
   skill_matches JSONB,                   -- {matched: [], missing: [], adjacent: []}
+  breakdown JSONB DEFAULT '{"skills":0,"experience":0,"location":0,"title":0,"salary":0}',
+  gate_failed TEXT,                      -- "skills" | "title" | null
   calculated_at TIMESTAMPTZ DEFAULT now(),
 
   PRIMARY KEY (user_id, job_id)
