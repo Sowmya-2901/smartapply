@@ -117,15 +117,6 @@
     "industry": "Productivity"
   },
   {
-    "name": "Databricks",
-    "slug": "databricks",
-    "ats_platform": "greenhouse",
-    "careers_url": "https://www.databricks.com/company/careers",
-    "website_url": "https://databricks.com",
-    "employee_count": 6000,
-    "industry": "Data"
-  },
-  {
     "name": "HashiCorp",
     "slug": "hashicorp",
     "ats_platform": "greenhouse",
@@ -142,15 +133,6 @@
     "website_url": "https://gitlab.com",
     "employee_count": 2000,
     "industry": "DevOps"
-  },
-  {
-    "name": "Cloudflare",
-    "slug": "cloudflare",
-    "ats_platform": "greenhouse",
-    "careers_url": "https://www.cloudflare.com/careers",
-    "website_url": "https://cloudflare.com",
-    "employee_count": 4000,
-    "industry": "Infrastructure"
   },
   {
     "name": "Airtable",
@@ -826,5 +808,131 @@
     "website_url": "https://step.com",
     "employee_count": 500,
     "industry": "Fintech"
+  },
+  {
+    "name": "Mistral",
+    "slug": "mistral",
+    "ats_platform": "lever",
+    "careers_url": "https://www.mistral.ai/careers",
+    "website_url": "https://www.mistral.ai",
+    "employee_count": null,
+    "industry": "AI Research"
+  },
+  {
+    "name": "Cohere",
+    "slug": "cohere",
+    "ats_platform": "ashby",
+    "careers_url": "https://www.cohere.com/careers",
+    "website_url": "https://www.cohere.com",
+    "employee_count": null,
+    "industry": "AI Research"
+  },
+  {
+    "name": "LangChain",
+    "slug": "langchain",
+    "ats_platform": "ashby",
+    "careers_url": "https://www.langchain.com/careers",
+    "website_url": "https://www.langchain.com",
+    "employee_count": null,
+    "industry": "AI Developer Tools"
+  },
+  {
+    "name": "Pinecone",
+    "slug": "pinecone",
+    "ats_platform": "ashby",
+    "careers_url": "https://www.pinecone.io/careers",
+    "website_url": "https://www.pinecone.io",
+    "employee_count": null,
+    "industry": "AI Infrastructure"
+  },
+  {
+    "name": "Deepgram",
+    "slug": "deepgram",
+    "ats_platform": "ashby",
+    "careers_url": "https://www.deepgram.com/careers",
+    "website_url": "https://www.deepgram.com",
+    "employee_count": null,
+    "industry": "Voice AI"
+  },
+  {
+    "name": "Hume AI",
+    "slug": "humeai",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.hume.ai/careers",
+    "website_url": "https://www.hume.ai",
+    "employee_count": null,
+    "industry": "Conversational AI"
+  },
+  {
+    "name": "Temporal",
+    "slug": "temporaltechnologies",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.temporal.io/careers",
+    "website_url": "https://www.temporal.io",
+    "employee_count": null,
+    "industry": "Workflow Automation"
+  },
+  {
+    "name": "Glean",
+    "slug": null,
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.glean.com/careers",
+    "website_url": "https://www.glean.com",
+    "employee_count": null,
+    "industry": "Enterprise Search"
+  },
+  {
+    "name": "Attio",
+    "slug": "attio",
+    "ats_platform": "ashby",
+    "careers_url": "https://www.attio.com/careers",
+    "website_url": "https://www.attio.com",
+    "employee_count": null,
+    "industry": "CRM"
+  },
+  {
+    "name": "Tinybird",
+    "slug": "tinybird",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.tinybird.com/careers",
+    "website_url": "https://www.tinybird.com",
+    "employee_count": null,
+    "industry": "Data Infrastructure"
+  },
+  {
+    "name": "Sierra AI",
+    "slug": "sierra",
+    "ats_platform": "ashby",
+    "careers_url": "https://www.sierra.ai/careers",
+    "website_url": "https://www.sierra.ai",
+    "employee_count": null,
+    "industry": "Conversational AI"
+  },
+  {
+    "name": "Ada",
+    "slug": "adahealth",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.ada.com/careers",
+    "website_url": "https://www.ada.com",
+    "employee_count": null,
+    "industry": "Healthcare"
+  },
+  {
+    "name": "Weights & Biases",
+    "slug": "weights-biases",
+    "ats_platform": "ashby",
+    "careers_url": "https://www.wdb.com/careers",
+    "website_url": "https://www.wdb.com",
+    "employee_count": null,
+    "industry": "ML Infrastructure"
+  },
+  {
+    "name": "Langfuse",
+    "slug": "langfuse",
+    "ats_platform": "ashby",
+    "careers_url": "https://langfuse.com/careers",
+    "website_url": "https://langfuse.com",
+    "employee_count": null,
+    "industry": "LLMOps"
   }
 ]

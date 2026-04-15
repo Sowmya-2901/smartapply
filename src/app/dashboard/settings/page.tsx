@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { JobPreferencesForm, type JobPreferencesData } from '@/components/forms/JobPreferencesForm'
 import type { User } from '@supabase/supabase-js'
 
 export default function SettingsPage() {
@@ -14,10 +15,7 @@ export default function SettingsPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
   // Form states
-  const [jobTitles, setJobTitles] = useState('')
-  const [locations, setLocations] = useState('')
-  const [remotePreference, setRemotePreference] = useState<string>('any')
-  const [minSalary, setMinSalary] = useState('')
+  const [initialPreferences, setInitialPreferences] = useState<Partial<JobPreferencesData>>({})
 
   useEffect(() => {
     const loadUserData = async () => {
@@ -38,10 +36,23 @@ export default function SettingsPage() {
         .single()
 
       if (profile) {
-        setJobTitles((profile.job_titles || []).join(', '))
-        setLocations((profile.locations || []).join(', '))
-        setRemotePreference(profile.remote_preference || 'any')
-        setMinSalary(profile.min_salary?.toString() || '')
+        setInitialPreferences({
+          job_titles: profile.job_titles || [],
+          seniority_preferences: profile.seniority_preferences || [],
+          experience_years: profile.experience_years || 0,
+          no_new_grad: profile.no_new_grad ?? true,
+          no_contract: profile.no_contract ?? true,
+          work_authorization: profile.work_authorization || 'US Citizen',
+          show_clearance_jobs: profile.show_clearance_jobs || false,
+          only_show_sponsoring: profile.only_show_sponsoring || false,
+          remote_preference: profile.remote_preference || 'any',
+          preferred_states: profile.preferred_states || [],
+          preferred_cities: profile.preferred_cities || [],
+          min_salary: profile.min_salary,
+          excluded_companies: profile.excluded_companies || [],
+          company_size_preference: profile.company_size_preference || [],
+          freshness_preference: profile.freshness_preference || '7days'
+        })
       }
 
       setLoading(false)
@@ -50,20 +61,14 @@ export default function SettingsPage() {
     loadUserData()
   }, [router])
 
-  const handleSavePreferences = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSavePreferences = async (preferences: JobPreferencesData) => {
     setSaving(true)
     setMessage(null)
 
     const supabase = createClient()
     const { error } = await supabase
       .from('profiles')
-      .update({
-        job_titles: jobTitles.split(',').map(t => t.trim()).filter(Boolean),
-        locations: locations.split(',').map(l => l.trim()).filter(Boolean),
-        remote_preference: remotePreference,
-        min_salary: minSalary ? parseInt(minSalary) : null,
-      })
+      .update(preferences)
       .eq('id', user?.id)
 
     setSaving(false)
@@ -72,7 +77,9 @@ export default function SettingsPage() {
       console.error('Error saving preferences:', error)
       setMessage({ type: 'error', text: error.message || 'Failed to save preferences' })
     } else {
-      setMessage({ type: 'success', text: 'Preferences saved successfully' })
+      setMessage({ type: 'success', text: 'Preferences saved! Your job feed will update.' })
+      // Clear message after 3 seconds
+      setTimeout(() => setMessage(null), 3000)
     }
   }
 
@@ -173,69 +180,12 @@ export default function SettingsPage() {
       {/* Tab Content */}
       <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
         {activeTab === 'preferences' && (
-          <form onSubmit={handleSavePreferences} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Job Titles</label>
-              <input
-                type="text"
-                value={jobTitles}
-                onChange={(e) => setJobTitles(e.target.value)}
-                placeholder="Software Engineer, Frontend Developer, Full Stack Developer"
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-              <p className="text-xs text-slate-500 mt-1">Comma-separated list of target job titles</p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Locations</label>
-              <input
-                type="text"
-                value={locations}
-                onChange={(e) => setLocations(e.target.value)}
-                placeholder="San Francisco, New York, Remote"
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-              <p className="text-xs text-slate-500 mt-1">Comma-separated list of preferred locations</p>
-            </div>
-
-            <div>
-              <label htmlFor="remotePreference" className="block text-sm font-medium text-slate-700 mb-1">Remote Preference</label>
-              <select
-                id="remotePreference"
-                value={remotePreference}
-                onChange={(e) => setRemotePreference(e.target.value)}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="any">Any (remote, hybrid, or onsite)</option>
-                <option value="remote">Remote only</option>
-                <option value="hybrid">Hybrid (remote + onsite)</option>
-                <option value="onsite">Onsite only</option>
-              </select>
-              <p className="text-xs text-slate-500 mt-1">Filter jobs by work arrangement</p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Minimum Salary</label>
-              <input
-                type="number"
-                value={minSalary}
-                onChange={(e) => setMinSalary(e.target.value)}
-                placeholder="100000"
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-              <p className="text-xs text-slate-500 mt-1">Annual salary in USD (optional)</p>
-            </div>
-
-            <div className="flex justify-end pt-4">
-              <button
-                type="submit"
-                disabled={saving}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50"
-              >
-                {saving ? 'Saving...' : 'Save Preferences'}
-              </button>
-            </div>
-          </form>
+          <JobPreferencesForm
+            initialData={initialPreferences}
+            onSave={handleSavePreferences}
+            loading={saving}
+            submitLabel="Save Preferences"
+          />
         )}
 
         {activeTab === 'profile' && (

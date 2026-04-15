@@ -43,7 +43,7 @@ export async function fetchAshbyJobs(clientName: string): Promise<RawJob[]> {
 
     for (const job of data.jobs) {
       try {
-        const parsedJob = parseAshbyJob(job)
+        const parsedJob = parseAshbyJob(job, clientName)
         if (parsedJob) {
           jobs.push(parsedJob)
         }
@@ -63,7 +63,7 @@ export async function fetchAshbyJobs(clientName: string): Promise<RawJob[]> {
 /**
  * Parse a single Ashby job into the RawJob format
  */
-function parseAshbyJob(job: any): RawJob | null {
+function parseAshbyJob(job: any, clientName: string): RawJob | null {
   if (!job.id || !job.title) {
     return null
   }
@@ -135,7 +135,7 @@ function parseAshbyJob(job: any): RawJob | null {
     salaryMax,
     department,
     employmentType,
-    applyUrl: job.applyUrl || job.hostedUrl || '',
+    applyUrl: job.applyUrl || job.hostedUrl || `https://jobs.ashbyhq.com/${clientName}/${job.id}`,
     postedAt,
     seniorityLevel
   }

@@ -5,6 +5,8 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { formatDistanceToNow } from 'date-fns'
+import { getTrackedApplyUrl, getAtsDisplayName } from '@/lib/utils/applyTracking'
+import { getTrackedApplyUrl, getAtsDisplayName } from '@/lib/utils/applyTracking'
 
 /**
  * Job Detail Page
@@ -27,6 +29,7 @@ interface Job {
   department: string | null
   employment_type: string | null
   apply_url: string
+  source_api: string
   posted_at: string | null
   discovered_at: string
   company: {
@@ -49,9 +52,18 @@ export default function JobDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Match score data state
+  const [matchData, setMatchData] = useState<{
+    match_score: number | null
+    skill_matches: { matched: string[]; missing: string[]; adjacent: string[] } | null
+    breakdown: any
+    gate_failed: string | null
+  } | null>(null)
+
   useEffect(() => {
     if (jobId) {
       loadJob()
+      loadMatchData()
     }
   }, [jobId])
 
@@ -81,6 +93,24 @@ export default function JobDetailPage() {
     }
   }
 
+  async function loadMatchData() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data } = await supabase
+        .from('user_job_matches')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('job_id', jobId)
+        .single()
+
+      setMatchData(data)
+    } catch (err) {
+      console.error('Error loading match data:', err)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -104,10 +134,10 @@ export default function JobDetailPage() {
     )
   }
 
-  // Mock match score data (will come from user_job_matches table)
-  const matchScore = 85
-  const matchedSkills = ['React', 'TypeScript', 'Node.js']
-  const missingSkills = ['Kubernetes', 'Terraform']
+  // Match score data from user_job_matches table
+  const matchScore = matchData?.match_score ?? null
+  const matchedSkills = matchData?.skill_matches?.matched || []
+  const missingSkills = matchData?.skill_matches?.missing || []
 
   function formatSalary(min: number | null, max: number | null): string | null {
     if (!min && !max) return null
@@ -136,14 +166,13 @@ export default function JobDetailPage() {
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-2xl lg:text-3xl font-bold text-slate-900">{job.title}</h1>
-              <span className="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">
-                ✅ Real Company
+              <span className="px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded">
+                ✅ Via {getAtsDisplayName(job.source_api)}
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-3 text-slate-600">
               <span className="font-semibold text-lg">{job.company?.name}</span>
               <span className="text-slate-300">•</span>
-              <span className="text-green-600">via {job.company?.ats_platform}</span>
               {job.location && <span>📍 {job.location}</span>}
               {job.remote_type === 'remote' && <span className="px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded">Remote</span>}
               {job.remote_type === 'hybrid' && <span className="px-2 py-1 bg-purple-100 text-purple-800 text-sm rounded">Hybrid</span>}
@@ -153,15 +182,25 @@ export default function JobDetailPage() {
               {job.company?.employee_count && <span>🏢 {job.company.employee_count.toLocaleString()} employees</span>}
               {job.company?.industry && <span>📊 {job.company.industry}</span>}
               {job.department && <span>📂 {job.department}</span>}
+              {job.company?.careers_url && (
+                <a
+                  href={job.company.careers_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
+                  View all jobs at {job.company.name} →
+                </a>
+              )}
             </div>
           </div>
           <a
-            href={job.apply_url}
+            href={getTrackedApplyUrl(job.apply_url, job.source_api)}
             target="_blank"
             rel="noopener noreferrer"
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
           >
-            Apply Now
+            Apply Now ↗
           </a>
         </div>
       </div>
@@ -198,30 +237,36 @@ export default function JobDetailPage() {
             <div className="mb-6">
               <h3 className="text-sm font-semibold text-slate-900 mb-3">Skills Analysis</h3>
 
-              {matchedSkills.length > 0 && (
-                <div className="mb-3">
-                  <p className="text-xs text-slate-500 mb-2">✅ Matched Skills</p>
-                  <div className="flex flex-wrap gap-2">
-                    {matchedSkills.map(skill => (
-                      <span key={skill} className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {matchData ? (
+                <>
+                  {matchData.skill_matches?.matched && matchData.skill_matches.matched.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-xs text-slate-500 mb-2">✅ Matched Skills</p>
+                      <div className="flex flex-wrap gap-2">
+                        {matchData.skill_matches.matched.map(skill => (
+                          <span key={skill} className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
-              {missingSkills.length > 0 && (
-                <div>
-                  <p className="text-xs text-slate-500 mb-2">❌ Missing Skills</p>
-                  <div className="flex flex-wrap gap-2">
-                    {missingSkills.map(skill => (
-                      <span key={skill} className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded">
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+                  {matchData.skill_matches?.missing && matchData.skill_matches.missing.length > 0 && (
+                    <div>
+                      <p className="text-xs text-slate-500 mb-2">❌ Missing Skills</p>
+                      <div className="flex flex-wrap gap-2">
+                        {matchData.skill_matches.missing.map(skill => (
+                          <span key={skill} className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded">
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <p className="text-xs text-slate-500 italic">Upload your resume to see skill analysis</p>
               )}
             </div>
 
@@ -293,12 +338,12 @@ export default function JobDetailPage() {
                 🔧 Optimize Resume for This Job
               </Link>
               <a
-                href={job.apply_url}
+                href={getTrackedApplyUrl(job.apply_url, job.source_api)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block w-full px-4 py-3 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium text-center"
               >
-                📤 Apply Now
+                📤 Apply Now ↗
               </a>
               <button className="w-full px-4 py-3 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium">
                 🔖 Save Job

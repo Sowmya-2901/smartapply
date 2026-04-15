@@ -8,6 +8,22 @@ import { detectStaffingAgency } from '@/lib/filters/staffingDetector'
 import { normalizeForDedup } from '@/lib/utils/dedup'
 
 /**
+ * Generate career page URL based on ATS platform and slug
+ */
+function generateCareersUrl(atsPlatform: string, slug: string): string {
+  switch (atsPlatform) {
+    case 'greenhouse':
+      return `https://boards.greenhouse.io/${slug}`
+    case 'lever':
+      return `https://jobs.lever.co/${slug}`
+    case 'ashby':
+      return `https://jobs.ashbyhq.com/${slug}`
+    default:
+      return ''
+  }
+}
+
+/**
  * Job Polling API Route
  *
  * This route is called by Vercel Cron every 2 hours to fetch jobs from all companies.
@@ -49,6 +65,19 @@ export async function GET(request: Request) {
     const greenhouseCompanies = companies.filter(c => c.ats_platform === 'greenhouse')
     const leverCompanies = companies.filter(c => c.ats_platform === 'lever')
     const ashbyCompanies = companies.filter(c => c.ats_platform === 'ashby')
+
+    // Step 1.5: Ensure all companies have careers_url
+    for (const company of companies) {
+      if (!company.careers_url && company.slug && company.ats_platform) {
+        const generatedUrl = generateCareersUrl(company.ats_platform, company.slug)
+        if (generatedUrl) {
+          await supabase
+            .from('companies')
+            .update({ careers_url: generatedUrl })
+            .eq('id', company.id)
+        }
+      }
+    }
 
     // Step 2: Process each company
     const allExternalIds = new Set<string>()

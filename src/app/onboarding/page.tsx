@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { JobPreferencesForm, type JobPreferencesData } from '@/components/forms/JobPreferencesForm'
 
 /**
  * Onboarding Page - 7 Step Wizard
@@ -28,13 +29,8 @@ interface OnboardingData {
   bannedWords?: string[]
   customRules?: string
   optimizedText?: string
-  jobTitles?: string[]
-  locations?: string[]
-  remotePreference?: string
-  minSalary?: number
-  experienceYears?: number
-  noNewGrad?: boolean
-  noContract?: boolean
+  // Job preferences - now using JobPreferencesData structure
+  jobPreferences?: Partial<JobPreferencesData>
 }
 
 export default function OnboardingPage() {
@@ -50,9 +46,23 @@ export default function OnboardingPage() {
     contentRules: 'Add missing JD skills to Skills section\nWrite new bullet points for missing skills under relevant experience/projects\nEvery bullet must have: Action verb + What you did + How + Result with numbers\nUse varied bullet patterns (never start 3+ bullets the same way)\nAdd approximate metrics where exact numbers aren\'t available, marked with (~)\nNever remove existing bullet points from the original resume\nNever change job titles, company names, dates, GPA, or degrees\nNever invent companies or certifications',
     bannedWords: ['passionate', 'synergy', 'leverage', 'spearheaded', 'guru', 'ninja', 'rockstar', 'innovative', 'dynamic', 'detail-oriented', 'results-driven', 'team player', 'cutting-edge', 'utilized', 'leveraged', 'robust', 'scalable solutions', 'best practices'],
     customRules: '',
-    remotePreference: 'remote',
-    noNewGrad: true,
-    noContract: true
+    jobPreferences: {
+      work_authorization: 'US Citizen',
+      remote_preference: 'any',
+      no_new_grad: true,
+      no_contract: true,
+      freshness_preference: '7days',
+      experience_years: 0,
+      job_titles: [],
+      seniority_preferences: [],
+      show_clearance_jobs: false,
+      only_show_sponsoring: false,
+      preferred_states: [],
+      preferred_cities: [],
+      min_salary: null,
+      excluded_companies: [],
+      company_size_preference: []
+    }
   })
 
   // Check if user already completed onboarding
@@ -111,7 +121,7 @@ export default function OnboardingPage() {
       case 6:
         return <Step6AnswerBank data={data} updateData={updateData} />
       case 7:
-        return <Step7Complete />
+        return <Step7Complete data={data} />
       default:
         return null
     }
@@ -467,156 +477,24 @@ function Step4JobPreferences({ data, updateData }: {
   data: OnboardingData
   updateData: (updates: Partial<OnboardingData>) => void
 }) {
-  const [newTitle, setNewTitle] = useState('')
-  const [newLocation, setNewLocation] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  const handleSavePreferences = async (preferences: JobPreferencesData) => {
+    setSaving(true)
+    // Update parent state with new preferences
+    updateData({ jobPreferences: preferences })
+    setSaving(false)
+  }
 
   return (
-    <div className="bg-white rounded-2xl p-8 shadow-sm">
-      <h2 className="text-2xl font-semibold text-slate-900 mb-4">Job search preferences</h2>
-      <p className="text-slate-600 mb-8">
-        Tell us what kind of jobs you're looking for. This helps us find the best matches.
-      </p>
-
-      {/* Job Titles */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-slate-700 mb-2">Job Titles</label>
-        <div className="flex flex-wrap gap-2 mb-3">
-          {data.jobTitles?.map(title => (
-            <span
-              key={title}
-              className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm flex items-center gap-2"
-            >
-              {title}
-              <button onClick={() => updateData({ jobTitles: data.jobTitles?.filter(t => t !== title) })}>&times;</button>
-            </span>
-          ))}
-        </div>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter' && newTitle.trim()) {
-                updateData({ jobTitles: [...(data.jobTitles || []), newTitle.trim()] })
-                setNewTitle('')
-              }
-            }}
-            className="flex-1 px-4 py-2 border border-slate-300 rounded-lg"
-            placeholder="Add a job title (e.g., Backend Engineer)"
-          />
-          <button
-            onClick={() => {
-              if (newTitle.trim()) {
-                updateData({ jobTitles: [...(data.jobTitles || []), newTitle.trim()] })
-                setNewTitle('')
-              }
-            }}
-            className="px-4 py-2 bg-slate-900 text-white rounded-lg"
-          >
-            Add
-          </button>
-        </div>
-      </div>
-
-      {/* Locations */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-slate-700 mb-2">Locations</label>
-        <div className="flex flex-wrap gap-2 mb-3">
-          {data.locations?.map(location => (
-            <span
-              key={location}
-              className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm flex items-center gap-2"
-            >
-              {location}
-              <button onClick={() => updateData({ locations: data.locations?.filter(l => l !== location) })}>&times;</button>
-            </span>
-          ))}
-        </div>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={newLocation}
-            onChange={(e) => setNewLocation(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter' && newLocation.trim()) {
-                updateData({ locations: [...(data.locations || []), newLocation.trim()] })
-                setNewLocation('')
-              }
-            }}
-            className="flex-1 px-4 py-2 border border-slate-300 rounded-lg"
-            placeholder="Add a location (e.g., Remote, San Francisco)"
-          />
-          <button
-            onClick={() => {
-              if (newLocation.trim()) {
-                updateData({ locations: [...(data.locations || []), newLocation.trim()] })
-                setNewLocation('')
-              }
-            }}
-            className="px-4 py-2 bg-slate-900 text-white rounded-lg"
-          >
-            Add
-          </button>
-        </div>
-      </div>
-
-      {/* Remote Preference */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-slate-700 mb-2">Remote Preference</label>
-        <div className="flex gap-4">
-          {['remote', 'hybrid', 'onsite', 'any'].map(pref => (
-            <label key={pref} className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="remote"
-                value={pref}
-                checked={data.remotePreference === pref}
-                onChange={(e) => updateData({ remotePreference: e.target.value })}
-                className="w-4 h-4 text-blue-600"
-              />
-              <span className="capitalize">{pref}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-
-      {/* Experience Years */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-slate-700 mb-2">Years of Experience</label>
-        <input
-          type="number"
-          value={data.experienceYears || ''}
-          onChange={(e) => updateData({ experienceYears: parseInt(e.target.value) || 0 })}
-          className="w-full px-4 py-2 border border-slate-300 rounded-lg"
-          placeholder="Enter your years of experience"
-          min="0"
-          max="50"
-        />
-      </div>
-
-      {/* Filters */}
-      <div className="space-y-3">
-        <label className="flex items-center gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={data.noNewGrad}
-            onChange={(e) => updateData({ noNewGrad: e.target.checked })}
-            className="w-4 h-4 text-blue-600 rounded"
-          />
-          <span className="text-slate-700">Hide new grad/entry level positions</span>
-        </label>
-        <label className="flex items-center gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={data.noContract}
-            onChange={(e) => updateData({ noContract: e.target.checked })}
-            className="w-4 h-4 text-blue-600 rounded"
-          />
-          <span className="text-slate-700">Hide contract/temp positions</span>
-        </label>
-      </div>
-    </div>
+    <JobPreferencesForm
+      initialData={data.jobPreferences}
+      onSave={handleSavePreferences}
+      loading={saving}
+      submitLabel="Continue"
+      cancelLabel={undefined}
+      onCancel={undefined}
+    />
   )
 }
 
@@ -853,24 +731,91 @@ function Step6AnswerBank({ data, updateData }: {
 // ============================================================================
 // STEP 7: Complete
 // ============================================================================
-function Step7Complete() {
+function Step7Complete({ data }: { data: OnboardingData }) {
   const router = useRouter()
   const [saving, setSaving] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const saveProfile = async () => {
       setSaving(true)
-      // In a real implementation, save all the onboarding data to the profile
-      setSaving(false)
+      setError(null)
+
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) throw new Error('Not authenticated')
+
+        // Prepare profile data with all preferences
+        const prefs = data.jobPreferences || {}
+
+        const profileData = {
+          // Resume rules
+          formatting_rules: data.formattingRules,
+          content_rules: data.contentRules,
+          banned_words: data.bannedWords,
+          custom_rules: data.customRules,
+
+          // Job preferences (11 filters)
+          job_titles: prefs.job_titles || [],
+          seniority_preferences: prefs.seniority_preferences || [],
+          experience_years: prefs.experience_years || 0,
+          no_new_grad: prefs.no_new_grad ?? true,
+          no_contract: prefs.no_contract ?? true,
+          work_authorization: prefs.work_authorization || 'US Citizen',
+          show_clearance_jobs: prefs.show_clearance_jobs || false,
+          only_show_sponsoring: prefs.only_show_sponsoring || false,
+          remote_preference: prefs.remote_preference || 'any',
+          preferred_states: prefs.preferred_states || [],
+          preferred_cities: prefs.preferred_cities || [],
+          min_salary: prefs.min_salary,
+          excluded_companies: prefs.excluded_companies || [],
+          company_size_preference: prefs.company_size_preference || [],
+          freshness_preference: prefs.freshness_preference || '7days'
+        }
+
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update(profileData)
+          .eq('id', user.id)
+
+        if (updateError) throw updateError
+
+        setSaving(false)
+      } catch (err: any) {
+        setError(err.message || 'Failed to save profile')
+        setSaving(false)
+      }
     }
     saveProfile()
-  }, [])
+  }, [data])
 
   if (saving) {
     return (
       <div className="bg-white rounded-2xl p-8 shadow-sm text-center">
         <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
         <h2 className="text-2xl font-semibold text-slate-900 mb-2">Saving your profile...</h2>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-2xl p-8 shadow-sm text-center">
+        <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg className="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </div>
+        <h2 className="text-2xl font-semibold text-slate-900 mb-4">Failed to save profile</h2>
+        <p className="text-slate-600 mb-6">{error}</p>
+        <button
+          onClick={() => router.push('/onboarding')}
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          Try Again
+        </button>
       </div>
     )
   }

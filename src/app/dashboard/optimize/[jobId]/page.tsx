@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { downloadResumeDocx } from '@/lib/resume/generateDocx'
+import { getTrackedApplyUrl } from '@/lib/utils/applyTracking'
 
 /**
  * Resume Optimizer Page
@@ -128,11 +129,57 @@ export default function ResumeOptimizerPage() {
   async function handleApply() {
     if (!job) return
 
-    // Open the apply URL in a new tab
-    window.open(job.apply_url, '_blank')
+    try {
+      // First, save the tailored resume to database
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
 
-    // TODO: Create application record in database
-    // This would be implemented in the full flow
+      // Save tailored resume
+      const { data: tailoredResume, error: resumeError } = await supabase
+        .from('resumes')
+        .insert({
+          user_id: user.id,
+          type: 'job_tailored',
+          job_id: job.id,
+          parsed_text: optimized.optimizedText,
+          change_summary: optimized.changeSummary,
+          is_current: true
+        })
+        .select()
+        .single()
+
+      if (resumeError) throw resumeError
+
+      // Create application record
+      const response = await fetch('/api/applications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          job_id: job.id,
+          resume_id: tailoredResume.id,
+          match_score: null // Could be calculated if needed
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create application record')
+      }
+
+      // Show success message
+      alert('📄 Application logged! Your tailored resume has been downloaded.\n\nThe application page will now open in a new tab. Please upload your tailored resume when applying.')
+
+      // Then open the tracked apply URL in a new tab
+      const trackedUrl = getTrackedApplyUrl(job.apply_url, job.source_api)
+      window.open(trackedUrl, '_blank')
+
+    } catch (err) {
+      console.error('Application error:', err)
+      alert(`Failed to log application: ${err.message}\n\nThe application page will still open in a new tab.`)
+
+      // Still open the apply URL even if logging failed
+      const trackedUrl = getTrackedApplyUrl(job.apply_url, job.source_api)
+      window.open(trackedUrl, '_blank')
+    }
   }
 
   if (loading) {

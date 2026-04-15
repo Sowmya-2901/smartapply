@@ -133,7 +133,7 @@ function parseLeverJob(job: any, companySlug: string): RawJob | null {
     salaryMax,
     department,
     employmentType,
-    applyUrl: job.hostedUrl || `https://jobs.lever.co/${companySlug}/${job.id}`,
+    applyUrl: job.applyUrl || job.hostedUrl || `https://jobs.lever.co/${companySlug}/${job.id}`,
     postedAt,
     seniorityLevel
   }

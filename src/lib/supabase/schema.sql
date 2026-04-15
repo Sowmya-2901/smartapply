@@ -102,15 +102,17 @@ CREATE TABLE IF NOT EXISTS profiles (
 
   -- Job search preferences
   job_titles TEXT[],                     -- Array of preferred job titles
-  locations TEXT[],                      -- Array of preferred locations
+  preferred_states TEXT[],               -- Array of preferred US states (2-letter abbreviations: CA, TX, NY)
+  preferred_cities TEXT[],               -- Optional: Array of preferred cities
   remote_preference TEXT CHECK (remote_preference IN ('remote', 'hybrid', 'onsite', 'any')),
   min_salary INTEGER,
   experience_years INTEGER,
   seniority_preferences TEXT[],
   no_new_grad BOOLEAN DEFAULT true,
   no_contract BOOLEAN DEFAULT true,
-  visa_sponsorship_required BOOLEAN DEFAULT false,
-  us_citizen_only_filter BOOLEAN DEFAULT false,
+  work_authorization TEXT,               -- User's visa/citizenship status (enum)
+  show_clearance_jobs BOOLEAN DEFAULT false, -- Override: show jobs requiring security clearance
+  only_show_sponsoring BOOLEAN DEFAULT false, -- Override: only show jobs that offer visa sponsorship
   excluded_companies TEXT[],
   company_size_preference TEXT[],
   freshness_preference TEXT DEFAULT 'all',
@@ -387,3 +389,29 @@ FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 -- ON storage.objects FOR DELETE
 -- TO authenticated
 -- USING (bucket_id = 'resumes' AND auth.uid()::text = (storage.foldername(name))[1]);
+
+-- ============================================================================
+-- MIGRATION: Job Preferences Filter System Updates
+-- ============================================================================
+-- Run this migration to update existing databases with the new filter system.
+-- This handles the transition from the old boolean filters to the new comprehensive system.
+-- ============================================================================
+
+-- Add new columns for work authorization overrides and city preferences
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS show_clearance_jobs BOOLEAN DEFAULT false;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS only_show_sponsoring BOOLEAN DEFAULT false;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS preferred_cities TEXT[];
+
+-- Rename locations to preferred_states for clarity
+ALTER TABLE profiles RENAME COLUMN locations TO preferred_states;
+
+-- Drop deprecated boolean columns (replaced by work_authorization enum)
+ALTER TABLE profiles DROP COLUMN IF EXISTS visa_sponsorship_required;
+ALTER TABLE profiles DROP COLUMN IF EXISTS us_citizen_only_filter;
+
+-- Migration complete! The profiles table now has:
+-- - preferred_states (renamed from locations)
+-- - preferred_cities (new)
+-- - show_clearance_jobs (new)
+-- - only_show_sponsoring (new)
+-- - work_authorization (already existed)

@@ -18,8 +18,12 @@ interface FilterConfig {
 }
 
 export const FILTER_DEFINITIONS: Record<string, FilterConfig> = {
+  // ============================================================================
+  // WORK AUTHORIZATION FILTERS
+  // ============================================================================
+
   /**
-   * Phrases indicating US citizenship/clearance requirements
+   * Phrases indicating US citizenship is required (not clearance, not sponsorship)
    * Tag: 'requires_us_citizenship'
    */
   requires_us_citizenship: {
@@ -27,42 +31,205 @@ export const FILTER_DEFINITIONS: Record<string, FilterConfig> = {
     match_any: [
       'us citizen',
       'u.s. citizen',
+      'u.s.citizen',
+      'us citizen only',
+      'u.s. citizen only',
       'united states citizen',
+      'us citizenship required',
+      'must be us citizen',
+      'must be a us citizen',
+      'require us citizenship',
+      'citizenship required',
+      'us nationals only',
+      'u.s. nationals only'
+    ]
+  },
+
+  /**
+   * Phrases indicating security clearance requirements
+   * Tag: 'requires_clearance'
+   */
+  requires_clearance: {
+    action: 'tag',
+    match_any: [
       'security clearance',
       'clearance required',
+      'active clearance',
+      'current clearance',
+      'valid clearance',
       'TS/SCI',
       'TS SCI',
       'top secret',
       'secret clearance',
-      'no international students',
-      'without sponsorship',
+      'public trust',
+      'ITAR',
+      'ITAR restricted',
+      'EAR',
+      'must be clearable',
+      'ability to obtain clearance',
+      'clearable',
+      'interim clearance',
+      'final clearance',
+      'dept of defense clearance',
+      'government clearance'
+    ]
+  },
+
+  /**
+   * Phrases indicating company will NOT sponsor visas
+   * Tag: 'no_sponsorship'
+   */
+  no_sponsorship: {
+    action: 'tag',
+    match_any: [
       'no visa sponsorship',
       'will not sponsor',
       'cannot sponsor',
       'does not sponsor',
       'unable to sponsor',
       'not sponsor',
-      'us persons only',
-      'u.s. persons',
-      'ITAR',
-      'EAR',
-      'ITAR restricted',
-      'permanent work authorization',
-      'authorized to work in the united states',
-      'must be authorized to work',
-      'legally authorized to work',
-      'work authorization required',
-      'no opt',
-      'no cpt',
-      'no ead',
-      'green card required',
-      'permanent resident',
-      'us citizenship required',
-      'must be us citizen',
-      'require us citizenship',
-      'citizenship required'
+      'no sponsorship available',
+      'without sponsorship',
+      'no sponsorship',
+      'no visa',
+      'cannot provide sponsorship',
+      'not providing sponsorship',
+      'independent work authorization required',
+      'must be authorized to work without sponsorship',
+      'permanent work authorization required',
+      'must have permanent work authorization',
+      'no work authorization sponsorship',
+      'we do not sponsor',
+      'we cannot sponsor',
+      'company does not sponsor'
     ]
   },
+
+  /**
+   * Phrases indicating OPT/CPT is not accepted
+   * Tag: 'no_opt'
+   */
+  no_opt: {
+    action: 'tag',
+    match_any: [
+      'no OPT',
+      'no CPT',
+      'no OPT CPT',
+      'no STEM OPT',
+      'no international students',
+      'not accept OPT',
+      'OPT not accepted',
+      'does not accept OPT',
+      'cannot accept OPT',
+      'CPT not accepted',
+      'no F1',
+      'no F1 visa',
+      'not accept F1',
+      'not eligible for OPT',
+      'no student visa',
+      'not accept international students'
+    ]
+  },
+
+  /**
+   * Phrases indicating H1B visa is not accepted/sponsored
+   * Tag: 'no_h1b'
+   */
+  no_h1b: {
+    action: 'tag',
+    match_any: [
+      'no H1B',
+      'no H-1B',
+      'no H1-B',
+      'no H1 B',
+      'not accept H1B',
+      'H1B not accepted',
+      'does not accept H1B',
+      'cannot accept H1B',
+      'not transfer H1B',
+      'no H1B transfer',
+      'H1B visa not accepted',
+      'not sponsoring H1B'
+    ]
+  },
+
+  /**
+   * Phrases indicating H4 EAD is not accepted
+   * Tag: 'no_h4'
+   */
+  no_h4: {
+    action: 'tag',
+    match_any: [
+      'no H4',
+      'no H-4',
+      'no H4 EAD',
+      'no H4-EAD',
+      'H4 EAD not accepted',
+      'no EAD',
+      'not accept EAD',
+      'EAD not accepted',
+      'does not accept H4',
+      'H4 not accepted',
+      'not accept H4 dependent'
+    ]
+  },
+
+  /**
+   * Phrases indicating company DOES sponsor visas
+   * Tag: 'sponsors_visa'
+   */
+  sponsors_visa: {
+    action: 'tag',
+    match_any: [
+      'visa sponsorship available',
+      'we sponsor visas',
+      'visa sponsorship',
+      'will sponsor',
+      'sponsorship available',
+      'H1B welcome',
+      'H1B accepted',
+      'open to sponsorship',
+      'sponsor qualified candidates',
+      'sponsorship provided',
+      'we provide sponsorship',
+      'can sponsor',
+      'able to sponsor',
+      'visa transfer available',
+      'H1B transfer available',
+      'we will sponsor',
+      'employment visa sponsorship',
+      'work visa sponsorship',
+      'sponsor work authorization',
+      'green card sponsorship',
+      'we sponsor green cards'
+    ]
+  },
+
+  /**
+   * Phrases indicating permanent work authorization (green card/citizen) is required
+   * Tag: 'requires_permanent_authorization'
+   */
+  requires_permanent_authorization: {
+    action: 'tag',
+    match_any: [
+      'permanent work authorization',
+      'permanent authorization required',
+      'green card or citizen',
+      'permanent resident or citizen',
+      'must have permanent authorization',
+      'authorized to work permanently',
+      'must be permanently authorized',
+      'permanent work status',
+      'must be a permanent resident',
+      'green card holder',
+      'us citizen or green card',
+      'citizen or permanent resident'
+    ]
+  },
+
+  // ============================================================================
+  // JOB TYPE FILTERS
+  // ============================================================================
 
   /**
    * Phrases indicating contract/temp work
@@ -471,7 +638,14 @@ export function normalizeSkill(skill: string): string {
 export function calculateMatchScore(
   userSkills: string[],
   jobSkills: string[],
-  userProfile: { experience_years?: number; job_titles?: string[] },
+  userProfile: {
+    experience_years?: number;
+    job_titles?: string[];
+    remote_preference?: string;
+    preferred_states?: string[];
+    preferred_cities?: string[];
+    min_salary?: number | null;
+  },
   job: { parsed_experience_years?: number; location?: string; remote_type?: string; title?: string }
 ): { score: number; breakdown: { skills: number; experience: number; location: number; title: number; salary: number }; gate_failed: 'skills' | 'title' | null } {
   // Normalize both skill sets
@@ -502,8 +676,44 @@ export function calculateMatchScore(
     }
   }
 
-  // Location match (10% weight) - simplified for now
-  const locationScore = 10 // Assume match for now
+  // Location match (10% weight) - full implementation
+  let locationScore = 10 // Default neutral score
+
+  if (userProfile.location && job.location) {
+    // User wants remote and job is remote → perfect match
+    if (userProfile.location === 'remote' && job.remote_type === 'remote') {
+      locationScore = 10
+    }
+    // User has specific location preferences
+    else if (userProfile.preferred_states && userProfile.preferred_states.length > 0) {
+      // Check if job location matches user's preferred states
+      const jobLocation = (job.location || '').toLowerCase()
+      const preferredStates = userProfile.preferred_states.map(s => s.toLowerCase())
+
+      for (const state of preferredStates) {
+        if (jobLocation.includes(state)) {
+          locationScore = 10
+          break
+        }
+      }
+    }
+    // If job location is in user's preferred cities
+    else if (userProfile.preferred_cities && userProfile.preferred_cities.length > 0) {
+      const jobLocation = (job.location || '').toLowerCase()
+      const preferredCities = userProfile.preferred_cities.map(c => c.toLowerCase())
+
+      for (const city of preferredCities) {
+        if (jobLocation.includes(city)) {
+          locationScore = 10
+          break
+        }
+      }
+    }
+    // If no match but job is remote and user is open to remote
+    else if (userProfile.remote_preference === 'any' && job.remote_type === 'remote') {
+      locationScore = 8 // Give partial credit for remote jobs when user is flexible
+    }
+  }
 
   // Title match (10% weight) - use actual title matching
   let titleScore = 10 // Default neutral score
@@ -512,8 +722,20 @@ export function calculateMatchScore(
     titleScore = titleMatch.score
   }
 
-  // Salary match (10% weight) - simplified for now
-  const salaryScore = 10 // Assume match for now
+  // Salary match (10% weight) - full implementation
+  let salaryScore = 10 // Default neutral score
+  if (userProfile.min_salary && job.salary_max) {
+    if (job.salary_max >= userProfile.min_salary) {
+      salaryScore = 10
+    } else {
+      // Partial credit based on how close they are
+      const ratio = userProfile.min_salary / job.salary_max
+      salaryScore = Math.round(ratio * 10)
+    }
+  } else if (userProfile.min_salary && !job.salary_max) {
+    // Job has no salary info but user has a minimum
+    salaryScore = 5 // Neutral/partial
+  }
 
   // Calculate base score
   let baseScore = Math.round(skillScore + experienceScore + locationScore + titleScore + salaryScore)

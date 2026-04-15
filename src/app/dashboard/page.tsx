@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { calculateMatchScore } from '@/lib/filters/synonyms'
+import { jobPassesWorkAuthorizationFilters } from '@/lib/filters/workAuthorization'
+import { getTrackedApplyUrl, getAtsDisplayName } from '@/lib/utils/applyTracking'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -19,6 +21,7 @@ interface Job {
   salary_max: number | null
   discovered_at: string
   apply_url: string
+  source_api: string
   required_skills: string[] | null
   parsed_experience_years: number | null
 }
@@ -56,12 +59,15 @@ async function getJobs(limit: number = 50): Promise<{
   let userExperience = 0
   let userJobTitles: string[] = []
 
+  // User profile preferences
+  let profile: any = null
+
   if (user) {
     const { data: resume } = await userSupabase
       .from('resumes')
       .select('parsed_skills')
       .eq('user_id', user.id)
-      .eq('type', 'raw_base')
+      .eq('type', 'master_optimized')
       .maybeSingle()
 
     if (resume?.parsed_skills) {
@@ -69,19 +75,37 @@ async function getJobs(limit: number = 50): Promise<{
       userSkills = resume.parsed_skills
     }
 
-    // Get user's experience and job titles
-    const { data: profile } = await userSupabase
+    // Get user's complete profile with all preferences
+    const { data: profileData } = await userSupabase
       .from('profiles')
-      .select('experience_years, job_titles')
+      .select(`
+        experience_years,
+        job_titles,
+        seniority_preferences,
+        no_new_grad,
+        no_contract,
+        work_authorization,
+        show_clearance_jobs,
+        only_show_sponsoring,
+        remote_preference,
+        preferred_states,
+        preferred_cities,
+        min_salary,
+        excluded_companies,
+        company_size_preference,
+        freshness_preference,
+        match_threshold
+      `)
       .eq('id', user.id)
       .single()
 
+    profile = profileData
     userExperience = profile?.experience_years || 0
     userJobTitles = profile?.job_titles || []
   }
 
-  // Fetch jobs with required skills
-  const { data: jobs } = await supabase
+  // Build the jobs query with all filters
+  let query = supabase
     .from('jobs')
     .select(`
       id,
@@ -92,12 +116,116 @@ async function getJobs(limit: number = 50): Promise<{
       salary_max,
       discovered_at,
       apply_url,
+      source_api,
       required_skills,
-      parsed_experience_years
+      parsed_experience_years,
+      filter_tags,
+      company_id,
+      seniority_level
     `)
     .eq('is_active', true)
-    .order('discovered_at', { ascending: false })
-    .limit(limit)
+
+  // Apply profile-based filters if user has a profile
+  if (profile) {
+    // FILTER 1: Job titles (ILIKE matching)
+    if (profile.job_titles && profile.job_titles.length > 0) {
+      // We'll handle this after fetching with OR logic
+      // Supabase doesn't support complex OR in the query builder easily
+    }
+
+    // FILTER 2: Seniority
+    if (profile.seniority_preferences && profile.seniority_preferences.length > 0) {
+      query = query.in('seniority_level', profile.seniority_preferences)
+    }
+
+    // FILTER 3: Experience years
+    if (profile.experience_years) {
+      query = query.lte('parsed_experience_years', profile.experience_years)
+    }
+
+    // FILTER 4: New grad
+    if (profile.no_new_grad) {
+      query = query.not('filter_tags', 'cs', '{"new_grad_job"}')
+    }
+
+    // FILTER 6: Remote type
+    if (profile.remote_preference && profile.remote_preference !== 'any') {
+      query = query.eq('remote_type', profile.remote_preference)
+    }
+
+    // FILTER 7: Salary
+    if (profile.min_salary) {
+      query = query.gte('salary_max', profile.min_salary)
+    }
+
+    // FILTER 8: Contract
+    if (profile.no_contract) {
+      query = query.not('filter_tags', 'cs', '{"contract_job"}')
+    }
+
+    // FILTER 11: Freshness
+    if (profile.freshness_preference && profile.freshness_preference !== 'all') {
+      const interval = getFreshnessInterval(profile.freshness_preference)
+      if (interval) {
+        query = query.gte('discovered_at', interval)
+      }
+    }
+  }
+
+  // Execute initial query
+  const { data: jobs } = await query.order('discovered_at', { ascending: false }).limit(limit * 2) // Fetch extra for post-filtering
+
+  // Post-fetch filtering (for complex filters that can't be done in SQL)
+  let filteredJobs = jobs || []
+
+  if (profile) {
+    filteredJobs = filteredJobs.filter(job => {
+      // FILTER 1: Job titles (ILIKE matching in JS)
+      if (profile.job_titles && profile.job_titles.length > 0) {
+        const titleMatch = profile.job_titles.some((titlePattern: string) => {
+          const pattern = titlePattern.toLowerCase().replace(/\s+/g, ' ')
+          const jobTitle = (job.title || '').toLowerCase().replace(/\s+/g, ' ')
+          return jobTitle.includes(pattern) || jobTitle === pattern
+        })
+        if (!titleMatch) return false
+      }
+
+      // FILTER 5: Work authorization (complex logic)
+      if (profile.work_authorization) {
+        const passesAuth = jobPassesWorkAuthorizationFilters(
+          job.filter_tags || [],
+          profile.work_authorization,
+          {
+            showClearance: profile.show_clearance_jobs || false,
+            onlySponsoring: profile.only_show_sponsoring || false
+          }
+        )
+        if (!passesAuth) return false
+      }
+
+      // FILTER 6: Locations (states and cities)
+      if (profile.preferred_states && profile.preferred_states.length > 0) {
+        const locationMatch = profile.preferred_states.some((state: string) => {
+          const location = (job.location || '').toLowerCase()
+          return location.includes(state.toLowerCase()) || location === state.toLowerCase()
+        })
+        if (!locationMatch && profile.remote_preference !== 'remote') return false
+      }
+
+      if (profile.preferred_cities && profile.preferred_cities.length > 0) {
+        const cityMatch = profile.preferred_cities.some((city: string) => {
+          const location = (job.location || '').toLowerCase()
+          return location.includes(city.toLowerCase())
+        })
+        if (!cityMatch && profile.remote_preference !== 'remote') return false
+      }
+
+      return true
+    })
+  }
+
+  // Apply limit after filtering
+  filteredJobs = filteredJobs.slice(0, limit)
 
   // Fetch stats
   const today = new Date()
@@ -112,7 +240,7 @@ async function getJobs(limit: number = 50): Promise<{
   // Calculate or fetch match scores for each job
   const matchScores = new Map<string, number>()
 
-  if (user && userHasResume && jobs) {
+  if (user && userHasResume && filteredJobs) {
     // Try to fetch cached match scores first
     const { data: cachedMatches } = await userSupabase
       .from('user_job_matches')
@@ -125,7 +253,7 @@ async function getJobs(limit: number = 50): Promise<{
     )
 
     // Calculate scores for jobs without cached data
-    for (const job of jobs) {
+    for (const job of filteredJobs) {
       if (cachedMap.has(job.id)) {
         matchScores.set(job.id, cachedMap.get(job.id)!)
       } else if (userSkills.length > 0 && job.required_skills && job.required_skills.length > 0) {
@@ -142,12 +270,39 @@ async function getJobs(limit: number = 50): Promise<{
           }
         )
         matchScores.set(job.id, result.score)
+
+        // Cache the calculated score to user_job_matches table
+        await userSupabase
+          .from('user_job_matches')
+          .upsert({
+            user_id: user.id,
+            job_id: job.id,
+            match_score: result.score,
+            skill_matches: {
+              matched: Object.entries(result.breakdown.skills).filter(([k, v]) => v > 0).map(([k]) => k) || [],
+              missing: Object.entries(result.breakdown.skills).filter(([k, v]) => v === 0).map(([k]) => k) || [],
+              adjacent: []
+            },
+            breakdown: result.breakdown,
+            gate_failed: result.gate_failed,
+            calculated_at: new Date().toISOString()
+          }, {
+            onConflict: 'user_id,job_id'
+          })
       } else {
         // No skills data, set to null
         matchScores.set(job.id, 0) // Will be treated as "no score"
       }
     }
   }
+
+  // Filter by match threshold if set
+  const matchThreshold = profile?.match_threshold || 60
+  const finalJobs = filteredJobs.filter(job => {
+    const score = matchScores.get(job.id)
+    if (score === null || score === 0) return true // Show jobs without scores
+    return score >= matchThreshold
+  })
 
   // Calculate average match
   let avgMatch = 0
@@ -166,10 +321,32 @@ async function getJobs(limit: number = 50): Promise<{
   }
 
   return {
-    jobs: (jobs || []) as Job[],
+    jobs: finalJobs as Job[],
     stats,
     userHasResume,
     matchScores
+  }
+}
+
+/**
+ * Helper function to get freshness interval
+ */
+function getFreshnessInterval(preference: string): string | null {
+  const now = new Date()
+  switch (preference) {
+    case '4hours':
+      return new Date(now.getTime() - 4 * 60 * 60 * 1000).toISOString()
+    case '24hours':
+      return new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
+    case '3days':
+      return new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString()
+    case '7days':
+      return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
+    case '30days':
+      return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
+    case 'all':
+    default:
+      return null
   }
 }
 
@@ -397,14 +574,19 @@ export default async function JobFeedPage({
                       >
                         Optimize Resume
                       </Link>
-                      <a
-                        href={job.apply_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium"
-                      >
-                        Apply ↗
-                      </a>
+                      <div className="flex flex-col items-start">
+                        <a
+                          href={getTrackedApplyUrl(job.apply_url, job.source_api)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium"
+                        >
+                          Apply ↗
+                        </a>
+                        <span className="text-xs text-slate-500 ml-4">
+                          Via {getAtsDisplayName(job.source_api)}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
