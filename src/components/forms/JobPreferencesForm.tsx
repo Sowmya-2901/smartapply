@@ -43,7 +43,7 @@ export interface JobPreferencesFormProps {
   onSave: (data: JobPreferencesData) => Promise<void>
   loading?: boolean
   submitLabel?: string
-  cancelLabel?: string?
+  cancelLabel?: string
   onCancel?: () => void
 }
 

@@ -14,6 +14,9 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { calculateMatchScore } from '@/lib/filters/synonyms'
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 /**
  * POST /api/jobs/calculate-matches
  *

@@ -7,6 +7,9 @@ import { tagJobDescription } from '@/lib/filters/synonyms'
 import { detectStaffingAgency } from '@/lib/filters/staffingDetector'
 import { normalizeForDedup } from '@/lib/utils/dedup'
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 /**
  * Generate career page URL based on ATS platform and slug
  */

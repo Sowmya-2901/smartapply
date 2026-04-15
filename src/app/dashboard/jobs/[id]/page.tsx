@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { formatDistanceToNow } from 'date-fns'
 import { getTrackedApplyUrl, getAtsDisplayName } from '@/lib/utils/applyTracking'
-import { getTrackedApplyUrl, getAtsDisplayName } from '@/lib/utils/applyTracking'
 
 /**
  * Job Detail Page

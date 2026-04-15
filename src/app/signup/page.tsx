@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { OAuthButton } from '@/components/auth/OAuthButton'
+import { GoogleIcon, GitHubIcon } from '@/components/auth/ProviderIcons'
 
 /**
  * Signup Page
@@ -73,6 +75,29 @@ export default function SignupPage() {
         {/* Signup Card */}
         <div className="bg-white rounded-2xl shadow-2xl p-8">
           <h2 className="text-2xl font-semibold text-slate-900 mb-6">Create your account</h2>
+
+          {/* OAuth Buttons */}
+          <div className="space-y-3 mb-6">
+            <OAuthButton provider="google">
+              <GoogleIcon />
+              <span>Continue with Google</span>
+            </OAuthButton>
+
+            <OAuthButton provider="github">
+              <GitHubIcon />
+              <span>Continue with GitHub</span>
+            </OAuthButton>
+          </div>
+
+          {/* Divider */}
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-slate-500">Or continue with email</span>
+            </div>
+          </div>
 
           {/* Error Message */}
           {error && (

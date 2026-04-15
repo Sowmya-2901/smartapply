@@ -42,6 +42,21 @@ export async function GET(request: Request) {
         .eq('id', data.user.id)
         .single()
 
+      // If no profile exists, create one from OAuth metadata
+      if (!profile) {
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            id: data.user.id,
+            full_name: data.user.user_metadata?.full_name || data.user.user_metadata?.name || '',
+            email: data.user.email || '',
+          })
+
+        if (insertError) {
+          console.error('Profile creation error:', insertError)
+        }
+      }
+
       // If profile exists but hasn't completed onboarding, redirect there
       const finalRedirect = profile?.experience_years
         ? redirectTo

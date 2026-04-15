@@ -2,6 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 /**
  * Resume Optimization API Route
  *
@@ -138,7 +141,7 @@ INSTRUCTIONS:
 
 Return the tailored resume with clear section headers.
 Also return a JSON summary at the end with this format:
-{"skills_added": ["skill1", "skill2"], "bullets_added": number, "bullets_modified": number, "keywords_found": 12, "keywords_total": 15, "keyword_placement": {"summary": ["React", "Node.js"], "first_bullets": ["TypeScript"], "skills": ["Python", "AWS"]}}
+{"skills_added": ["skill1", "skill2"], "bullets_added": number, "bullets_modified": number, "keywords_found": 12, "keywords_total": 15, "keyword_placement": {"summary": ["React", "Node.js"], "first_bullets": ["TypeScript"], "skills": ["Python", "AWS"]}}`
 
       userPrompt = `RESUME TO TAILOR:\n${resumeText}\n\nJOB DESCRIPTION:\n${jobDescription}\n\nPlease tailor this resume for this job following all the rules above.`
     }
