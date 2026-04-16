@@ -196,8 +196,8 @@ export function JobPreferencesForm({
         <ToggleSwitch
           checked={noNewGrad}
           onChange={setNoNewGrad}
-          label="Hide new grad / entry level positions"
-          description="Jobs tagged as entry-level or new grad won't appear in your feed"
+          label="Hide new grad positions only"
+          description="Jobs specifically tagged as new grad, campus hire, or university hire won't appear in your feed"
         />
       </section>
 
