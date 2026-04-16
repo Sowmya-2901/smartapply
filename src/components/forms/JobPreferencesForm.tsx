@@ -364,9 +364,9 @@ export function JobPreferencesForm({
         </div>
       </section>
 
-      {/* Submit Buttons */}
-      <div className="flex gap-3 justify-end">
-        {onCancel && (
+      {/* Submit Buttons - Only show in settings page, not onboarding */}
+      {onCancel && (
+        <div className="flex gap-3 justify-end">
           <button
             type="button"
             onClick={onCancel}
@@ -375,15 +375,15 @@ export function JobPreferencesForm({
           >
             {cancelLabel}
           </button>
-        )}
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50"
-        >
-          {loading ? 'Saving...' : submitLabel}
-        </button>
-      </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50"
+          >
+            {loading ? 'Saving...' : submitLabel}
+          </button>
+        </div>
+      )}
     </form>
   )
 }
