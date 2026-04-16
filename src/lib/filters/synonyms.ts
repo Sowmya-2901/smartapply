@@ -274,8 +274,11 @@ export const FILTER_DEFINITIONS: Record<string, FilterConfig> = {
   },
 
   /**
-   * Phrases indicating new grad/entry level
+   * Phrases indicating new grad campus/university programs
    * Tag: 'new_grad_job'
+   *
+   * NOTE: Excludes "entry level" and "junior level" - those are handled by
+   * seniority preferences. This tag is specifically for campus hiring programs.
    */
   new_grad_job: {
     action: 'tag',
@@ -283,22 +286,19 @@ export const FILTER_DEFINITIONS: Record<string, FilterConfig> = {
       'new grad',
       'new graduate',
       'recent graduate',
-      'entry level',
-      'entry-level',
-      '0-1 years',
-      '0-2 years',
-      'no experience required',
-      'junior level',
       'university hire',
       'campus hire',
+      'campus recruiting',
       'rotational program',
       'early career',
       'early-career',
       'recent college graduate',
       'rcg',
-      'associate engineer',
-      'internship',
-      'apprenticeship'
+      'recent college grad',
+      'university recruiting',
+      'campus program',
+      'leadership development program',
+      'associate engineer' // Often used in campus programs
     ]
   },
 
