@@ -1,0 +1,938 @@
+[
+  {
+    "name": "Stripe",
+    "slug": "stripe",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://stripe.com/jobs",
+    "website_url": "https://stripe.com",
+    "employee_count": 8000,
+    "industry": "Fintech"
+  },
+  {
+    "name": "Airbnb",
+    "slug": "airbnb",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://careers.airbnb.com",
+    "website_url": "https://airbnb.com",
+    "employee_count": 6000,
+    "industry": "Travel"
+  },
+  {
+    "name": "HubSpot",
+    "slug": "hubspot",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.hubspot.com/careers",
+    "website_url": "https://hubspot.com",
+    "employee_count": 7000,
+    "industry": "Software"
+  },
+  {
+    "name": "Discord",
+    "slug": "discord",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://discord.com/careers",
+    "website_url": "https://discord.com",
+    "employee_count": 1000,
+    "industry": "Communication"
+  },
+  {
+    "name": "Coinbase",
+    "slug": "coinbase",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.coinbase.com/careers",
+    "website_url": "https://coinbase.com",
+    "employee_count": 5000,
+    "industry": "Fintech"
+  },
+  {
+    "name": "Figma",
+    "slug": "figma",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.figma.com/careers",
+    "website_url": "https://figma.com",
+    "employee_count": 1500,
+    "industry": "Design"
+  },
+  {
+    "name": "Pinterest",
+    "slug": "pinterest",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.pinterestcareers.com",
+    "website_url": "https://pinterest.com",
+    "employee_count": 5000,
+    "industry": "Social Media"
+  },
+  {
+    "name": "DoorDash",
+    "slug": "doordash",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.doordash.com/careers",
+    "website_url": "https://doordash.com",
+    "employee_count": 8000,
+    "industry": "Delivery"
+  },
+  {
+    "name": "Squarespace",
+    "slug": "squarespace",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.squarespace.com/careers",
+    "website_url": "https://squarespace.com",
+    "employee_count": 2000,
+    "industry": "Web Building"
+  },
+  {
+    "name": "Gusto",
+    "slug": "gusto",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.gusto.com/careers",
+    "website_url": "https://gusto.com",
+    "employee_count": 3000,
+    "industry": "Payroll"
+  },
+  {
+    "name": "Brex",
+    "slug": "brex",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.brex.com/careers",
+    "website_url": "https://brex.com",
+    "employee_count": 2000,
+    "industry": "Fintech"
+  },
+  {
+    "name": "Plaid",
+    "slug": "plaid",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://plaid.com/careers",
+    "website_url": "https://plaid.com",
+    "employee_count": 3000,
+    "industry": "Fintech"
+  },
+  {
+    "name": "Notion",
+    "slug": "notion",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.notion.so/careers",
+    "website_url": "https://notion.so",
+    "employee_count": 1000,
+    "industry": "Productivity"
+  },
+  {
+    "name": "HashiCorp",
+    "slug": "hashicorp",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.hashicorp.com/careers",
+    "website_url": "https://hashicorp.com",
+    "employee_count": 2000,
+    "industry": "Infrastructure"
+  },
+  {
+    "name": "GitLab",
+    "slug": "gitlab",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://about.gitlab.com/jobs",
+    "website_url": "https://gitlab.com",
+    "employee_count": 2000,
+    "industry": "DevOps"
+  },
+  {
+    "name": "Airtable",
+    "slug": "airtable",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.airtable.com/careers",
+    "website_url": "https://airtable.com",
+    "employee_count": 1500,
+    "industry": "Productivity"
+  },
+  {
+    "name": "Webflow",
+    "slug": "webflow",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://webflow.com/careers",
+    "website_url": "https://webflow.com",
+    "employee_count": 1000,
+    "industry": "Web Building"
+  },
+  {
+    "name": "Lattice",
+    "slug": "lattice",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.lattice.com/careers",
+    "website_url": "https://lattice.com",
+    "employee_count": 500,
+    "industry": "HR Tech"
+  },
+  {
+    "name": "Spotify",
+    "slug": "spotify",
+    "ats_platform": "lever",
+    "careers_url": "https://www.lifeatspotify.com/jobs",
+    "website_url": "https://spotify.com",
+    "employee_count": 9000,
+    "industry": "Music"
+  },
+  {
+    "name": "Netflix",
+    "slug": "netflix",
+    "ats_platform": "lever",
+    "careers_url": "https://jobs.netflix.com",
+    "website_url": "https://netflix.com",
+    "employee_count": 15000,
+    "industry": "Entertainment"
+  },
+  {
+    "name": "Atlassian",
+    "slug": "atlassian",
+    "ats_platform": "lever",
+    "careers_url": "https://www.atlassian.com/company/careers",
+    "website_url": "https://atlassian.com",
+    "employee_count": 10000,
+    "industry": "Software"
+  },
+  {
+    "name": "Eventbrite",
+    "slug": "eventbrite",
+    "ats_platform": "lever",
+    "careers_url": "https://www.eventbrite.com/careers",
+    "website_url": "https://eventbrite.com",
+    "employee_count": 2000,
+    "industry": "Events"
+  },
+  {
+    "name": "KPMG",
+    "slug": "kpmg",
+    "ats_platform": "lever",
+    "careers_url": "https://home.kpmg/careers",
+    "website_url": "https://kpmg.com",
+    "employee_count": 250000,
+    "industry": "Consulting"
+  },
+  {
+    "name": "Postman",
+    "slug": "postman",
+    "ats_platform": "lever",
+    "careers_url": "https://www.postman.com/careers",
+    "website_url": "https://postman.com",
+    "employee_count": 1000,
+    "industry": "API Tools"
+  },
+  {
+    "name": "Reddit",
+    "slug": "reddit",
+    "ats_platform": "ashby",
+    "careers_url": "https://www.redditinc.com/careers",
+    "website_url": "https://reddit.com",
+    "employee_count": 2000,
+    "industry": "Social Media"
+  },
+  {
+    "name": "Duolingo",
+    "slug": "duolingo",
+    "ats_platform": "ashby",
+    "careers_url": "https://careers.duolingo.com",
+    "website_url": "https://duolingo.com",
+    "employee_count": 500,
+    "industry": "Education"
+  },
+  {
+    "name": "Ramp",
+    "slug": "ramp",
+    "ats_platform": "ashby",
+    "careers_url": "https://ramp.com/careers",
+    "website_url": "https://ramp.com",
+    "employee_count": 1000,
+    "industry": "Fintech"
+  },
+  {
+    "name": "OpenAI",
+    "slug": "openai",
+    "ats_platform": "ashby",
+    "careers_url": "https://openai.com/careers",
+    "website_url": "https://openai.com",
+    "employee_count": 500,
+    "industry": "AI"
+  },
+  {
+    "name": "Canva",
+    "slug": "canva",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.canva.com/careers",
+    "website_url": "https://canva.com",
+    "employee_count": 5000,
+    "industry": "Design"
+  },
+  {
+    "name": "Shopify",
+    "slug": "shopify",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.shopify.com/careers",
+    "website_url": "https://shopify.com",
+    "employee_count": 10000,
+    "industry": "E-commerce"
+  },
+  {
+    "name": "Slack",
+    "slug": "slack",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://slack.com/careers",
+    "website_url": "https://slack.com",
+    "employee_count": 10000,
+    "industry": "Communication"
+  },
+  {
+    "name": "Square",
+    "slug": "square",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://careers.squareup.com",
+    "website_url": "https://squareup.com",
+    "employee_count": 8000,
+    "industry": "Payments"
+  },
+  {
+    "name": "Twitter",
+    "slug": "twitter",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://careers.twitter.com",
+    "website_url": "https://twitter.com",
+    "employee_count": 5000,
+    "industry": "Social Media"
+  },
+  {
+    "name": "Uber",
+    "slug": "uber",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.uber.com/careers",
+    "website_url": "https://uber.com",
+    "employee_count": 30000,
+    "industry": "Transportation"
+  },
+  {
+    "name": "Lyft",
+    "slug": "lyft",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.lyft.com/careers",
+    "website_url": "https://lyft.com",
+    "employee_count": 5000,
+    "industry": "Transportation"
+  },
+  {
+    "name": "Instacart",
+    "slug": "instacart",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.instacart.com/careers",
+    "website_url": "https://instacart.com",
+    "employee_count": 5000,
+    "industry": "Grocery"
+  },
+  {
+    "name": "Box",
+    "slug": "box",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.box.com/en-us/careers",
+    "website_url": "https://box.com",
+    "employee_count": 3000,
+    "industry": "Cloud Storage"
+  },
+  {
+    "name": "Dropbox",
+    "slug": "dropbox",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.dropbox.com/jobs",
+    "website_url": "https://dropbox.com",
+    "employee_count": 3000,
+    "industry": "Cloud Storage"
+  },
+  {
+    "name": "Zoom",
+    "slug": "zoom",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://careers.zoom.us",
+    "website_url": "https://zoom.us",
+    "employee_count": 5000,
+    "industry": "Communication"
+  },
+  {
+    "name": "Snap",
+    "slug": "snap",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.snap.com/careers",
+    "website_url": "https://snap.com",
+    "employee_count": 5000,
+    "industry": "Social Media"
+  },
+  {
+    "name": "TikTok",
+    "slug": "tiktok",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.tiktok.com/careers",
+    "website_url": "https://tiktok.com",
+    "employee_count": 10000,
+    "industry": "Social Media"
+  },
+  {
+    "name": "Roblox",
+    "slug": "roblox",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.roblox.com/careers",
+    "website_url": "https://roblox.com",
+    "employee_count": 2000,
+    "industry": "Gaming"
+  },
+  {
+    "name": "Epic Games",
+    "slug": "epic-games",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.epicgames.com/careers",
+    "website_url": "https://epicgames.com",
+    "employee_count": 5000,
+    "industry": "Gaming"
+  },
+  {
+    "name": "Unity",
+    "slug": "unity",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.unity.com/careers",
+    "website_url": "https://unity.com",
+    "employee_count": 5000,
+    "industry": "Gaming"
+  },
+  {
+    "name": "Adobe",
+    "slug": "adobe",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.adobe.com/careers",
+    "website_url": "https://adobe.com",
+    "employee_count": 25000,
+    "industry": "Software"
+  },
+  {
+    "name": "Salesforce",
+    "slug": "salesforce",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.salesforce.com/company/careers",
+    "website_url": "https://salesforce.com",
+    "employee_count": 70000,
+    "industry": "CRM"
+  },
+  {
+    "name": "Zendesk",
+    "slug": "zendesk",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.zendesk.com/careers",
+    "website_url": "https://zendesk.com",
+    "employee_count": 5000,
+    "industry": "Support"
+  },
+  {
+    "name": "Intercom",
+    "slug": "intercom",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.intercom.com/careers",
+    "website_url": "https://intercom.com",
+    "employee_count": 2000,
+    "industry": "Support"
+  },
+  {
+    "name": "Twilio",
+    "slug": "twilio",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.twilio.com/company/careers",
+    "website_url": "https://twilio.com",
+    "employee_count": 8000,
+    "industry": "Communication"
+  },
+  {
+    "name": "SendGrid",
+    "slug": "sendgrid",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://sendgrid.com/careers",
+    "website_url": "https://sendgrid.com",
+    "employee_count": 1000,
+    "industry": "Email"
+  },
+  {
+    "name": "Segment",
+    "slug": "segment",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://segment.com/careers",
+    "website_url": "https://segment.com",
+    "employee_count": 1000,
+    "industry": "Data"
+  },
+  {
+    "name": "Snowflake",
+    "slug": "snowflake",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://careers.snowflake.com",
+    "website_url": "https://snowflake.com",
+    "employee_count": 6000,
+    "industry": "Data"
+  },
+  {
+    "name": "MongoDB",
+    "slug": "mongodb",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.mongodb.com/careers",
+    "website_url": "https://mongodb.com",
+    "employee_count": 4000,
+    "industry": "Database"
+  },
+  {
+    "name": "Confluent",
+    "slug": "confluent",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.confluent.io/careers",
+    "website_url": "https://confluent.io",
+    "employee_count": 2000,
+    "industry": "Data"
+  },
+  {
+    "name": "Databricks",
+    "slug": "databricks",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.databricks.com/company/careers",
+    "website_url": "https://databricks.com",
+    "employee_count": 6000,
+    "industry": "Data"
+  },
+  {
+    "name": "Palantir",
+    "slug": "palantir",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.palantir.com/careers",
+    "website_url": "https://palantir.com",
+    "employee_count": 3000,
+    "industry": "Data"
+  },
+  {
+    "name": "Asana",
+    "slug": "asana",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://asana.com/careers",
+    "website_url": "https://asana.com",
+    "employee_count": 2000,
+    "industry": "Productivity"
+  },
+  {
+    "name": "Monday.com",
+    "slug": "monday",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://monday.com/careers",
+    "website_url": "https://monday.com",
+    "employee_count": 2000,
+    "industry": "Productivity"
+  },
+  {
+    "name": "Smartsheet",
+    "slug": "smartsheet",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.smartsheet.com/careers",
+    "website_url": "https://smartsheet.com",
+    "employee_count": 2000,
+    "industry": "Productivity"
+  },
+  {
+    "name": "Qualtrics",
+    "slug": "qualtrics",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.qualtrics.com/careers",
+    "website_url": "https://qualtrics.com",
+    "employee_count": 4000,
+    "industry": "Survey"
+  },
+  {
+    "name": "SurveyMonkey",
+    "slug": "survey-monkey",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.surveymonkey.com/careers",
+    "website_url": "https://surveymonkey.com",
+    "employee_count": 1000,
+    "industry": "Survey"
+  },
+  {
+    "name": "Okta",
+    "slug": "okta",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.okta.com/company/careers",
+    "website_url": "https://okta.com",
+    "employee_count": 5000,
+    "industry": "Identity"
+  },
+  {
+    "name": "Auth0",
+    "slug": "auth0",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://auth0.com/careers",
+    "website_url": "https://auth0.com",
+    "employee_count": 2000,
+    "industry": "Identity"
+  },
+  {
+    "name": "Snyk",
+    "slug": "snyk",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://careers.snyk.io",
+    "website_url": "https://snyk.io",
+    "employee_count": 1000,
+    "industry": "Security"
+  },
+  {
+    "name": "CrowdStrike",
+    "slug": "crowdstrike",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.crowdstrike.com/careers",
+    "website_url": "https://crowdstrike.com",
+    "employee_count": 5000,
+    "industry": "Security"
+  },
+  {
+    "name": "Palo Alto Networks",
+    "slug": "palo-alto-networks",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.paloaltonetworks.com/company/careers",
+    "website_url": "https://paloaltonetworks.com",
+    "employee_count": 10000,
+    "industry": "Security"
+  },
+  {
+    "name": "Fortinet",
+    "slug": "fortinet",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.fortinet.com/careers",
+    "website_url": "https://fortinet.com",
+    "employee_count": 10000,
+    "industry": "Security"
+  },
+  {
+    "name": "Check Point",
+    "slug": "check-point",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://jobs.checkpoint.com",
+    "website_url": "https://checkpoint.com",
+    "employee_count": 6000,
+    "industry": "Security"
+  },
+  {
+    "name": "Fastly",
+    "slug": "fastly",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.fastly.com/careers",
+    "website_url": "https://fastly.com",
+    "employee_count": 1500,
+    "industry": "Infrastructure"
+  },
+  {
+    "name": "Akamai",
+    "slug": "akamai",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.akamai.com/careers",
+    "website_url": "https://akamai.com",
+    "employee_count": 9000,
+    "industry": "Infrastructure"
+  },
+  {
+    "name": "Cloudflare",
+    "slug": "cloudflare",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.cloudflare.com/careers",
+    "website_url": "https://cloudflare.com",
+    "employee_count": 4000,
+    "industry": "Infrastructure"
+  },
+  {
+    "name": "New Relic",
+    "slug": "new-relic",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.newrelic.com/careers",
+    "website_url": "https://newrelic.com",
+    "employee_count": 3000,
+    "industry": "Monitoring"
+  },
+  {
+    "name": "Datadog",
+    "slug": "datadog",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.datadoghq.com/careers",
+    "website_url": "https://datadoghq.com",
+    "employee_count": 6000,
+    "industry": "Monitoring"
+  },
+  {
+    "name": "Splunk",
+    "slug": "splunk",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.splunk.com/en_us/careers",
+    "website_url": "https://splunk.com",
+    "employee_count": 8000,
+    "industry": "Monitoring"
+  },
+  {
+    "name": "Elastic",
+    "slug": "elastic",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.elastic.co/careers",
+    "website_url": "https://elastic.co",
+    "employee_count": 4000,
+    "industry": "Search"
+  },
+  {
+    "name": "Algolia",
+    "slug": "algolia",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.algolia.com/careers",
+    "website_url": "https://algolia.com",
+    "employee_count": 1000,
+    "industry": "Search"
+  },
+  {
+    "name": "Cockroach Labs",
+    "slug": "cockroach-labs",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.cockroachlabs.com/careers",
+    "website_url": "https://cockroachlabs.com",
+    "employee_count": 500,
+    "industry": "Database"
+  },
+  {
+    "name": "Timescale",
+    "slug": "timescale",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.timescale.com/careers",
+    "website_url": "https://timescale.com",
+    "employee_count": 200,
+    "industry": "Database"
+  },
+  {
+    "name": "PlanetScale",
+    "slug": "planetscale",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.planetscale.com/careers",
+    "website_url": "https://planetscale.com",
+    "employee_count": 200,
+    "industry": "Database"
+  },
+  {
+    "name": "Vercel",
+    "slug": "vercel",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://vercel.com/careers",
+    "website_url": "https://vercel.com",
+    "employee_count": 500,
+    "industry": "Infrastructure"
+  },
+  {
+    "name": "Linear",
+    "slug": "linear",
+    "ats_platform": "ashby",
+    "careers_url": "https://linear.app/careers",
+    "website_url": "https://linear.app",
+    "employee_count": 100,
+    "industry": "Productivity"
+  },
+  {
+    "name": "Mercury",
+    "slug": "mercury",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://mercury.com/careers",
+    "website_url": "https://mercury.com",
+    "employee_count": 200,
+    "industry": "Fintech"
+  },
+  {
+    "name": "Wise",
+    "slug": "wise",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://wise.com/careers",
+    "website_url": "https://wise.com",
+    "employee_count": 5000,
+    "industry": "Fintech"
+  },
+  {
+    "name": "Revolut",
+    "slug": "revolut",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.revolut.com/careers",
+    "website_url": "https://revolut.com",
+    "employee_count": 8000,
+    "industry": "Fintech"
+  },
+  {
+    "name": "Monzo",
+    "slug": "monzo",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://monzo.com/careers",
+    "website_url": "https://monzo.com",
+    "employee_count": 2000,
+    "industry": "Fintech"
+  },
+  {
+    "name": "Nubank",
+    "slug": "nubank",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://nubank.com/careers",
+    "website_url": "https://nubank.com",
+    "employee_count": 5000,
+    "industry": "Fintech"
+  },
+  {
+    "name": "N26",
+    "slug": "n26",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://n26.com/careers-en",
+    "website_url": "https://n26.com",
+    "employee_count": 2000,
+    "industry": "Fintech"
+  },
+  {
+    "name": "Chime",
+    "slug": "chime",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.chime.com/careers",
+    "website_url": "https://chime.com",
+    "employee_count": 1000,
+    "industry": "Fintech"
+  },
+  {
+    "name": "Current",
+    "slug": "current",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://current.com/careers",
+    "website_url": "https://current.com",
+    "employee_count": 500,
+    "industry": "Fintech"
+  },
+  {
+    "name": "Step",
+    "slug": "step",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://step.com/careers",
+    "website_url": "https://step.com",
+    "employee_count": 500,
+    "industry": "Fintech"
+  },
+  {
+    "name": "Mistral",
+    "slug": "mistral",
+    "ats_platform": "lever",
+    "careers_url": "https://www.mistral.ai/careers",
+    "website_url": "https://www.mistral.ai",
+    "employee_count": null,
+    "industry": "AI Research"
+  },
+  {
+    "name": "Cohere",
+    "slug": "cohere",
+    "ats_platform": "ashby",
+    "careers_url": "https://www.cohere.com/careers",
+    "website_url": "https://www.cohere.com",
+    "employee_count": null,
+    "industry": "AI Research"
+  },
+  {
+    "name": "LangChain",
+    "slug": "langchain",
+    "ats_platform": "ashby",
+    "careers_url": "https://www.langchain.com/careers",
+    "website_url": "https://www.langchain.com",
+    "employee_count": null,
+    "industry": "AI Developer Tools"
+  },
+  {
+    "name": "Pinecone",
+    "slug": "pinecone",
+    "ats_platform": "ashby",
+    "careers_url": "https://www.pinecone.io/careers",
+    "website_url": "https://www.pinecone.io",
+    "employee_count": null,
+    "industry": "AI Infrastructure"
+  },
+  {
+    "name": "Deepgram",
+    "slug": "deepgram",
+    "ats_platform": "ashby",
+    "careers_url": "https://www.deepgram.com/careers",
+    "website_url": "https://www.deepgram.com",
+    "employee_count": null,
+    "industry": "Voice AI"
+  },
+  {
+    "name": "Hume AI",
+    "slug": "humeai",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.hume.ai/careers",
+    "website_url": "https://www.hume.ai",
+    "employee_count": null,
+    "industry": "Conversational AI"
+  },
+  {
+    "name": "Temporal",
+    "slug": "temporaltechnologies",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.temporal.io/careers",
+    "website_url": "https://www.temporal.io",
+    "employee_count": null,
+    "industry": "Workflow Automation"
+  },
+  {
+    "name": "Glean",
+    "slug": null,
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.glean.com/careers",
+    "website_url": "https://www.glean.com",
+    "employee_count": null,
+    "industry": "Enterprise Search"
+  },
+  {
+    "name": "Attio",
+    "slug": "attio",
+    "ats_platform": "ashby",
+    "careers_url": "https://www.attio.com/careers",
+    "website_url": "https://www.attio.com",
+    "employee_count": null,
+    "industry": "CRM"
+  },
+  {
+    "name": "Tinybird",
+    "slug": "tinybird",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.tinybird.com/careers",
+    "website_url": "https://www.tinybird.com",
+    "employee_count": null,
+    "industry": "Data Infrastructure"
+  },
+  {
+    "name": "Sierra AI",
+    "slug": "sierra",
+    "ats_platform": "ashby",
+    "careers_url": "https://www.sierra.ai/careers",
+    "website_url": "https://www.sierra.ai",
+    "employee_count": null,
+    "industry": "Conversational AI"
+  },
+  {
+    "name": "Ada",
+    "slug": "adahealth",
+    "ats_platform": "greenhouse",
+    "careers_url": "https://www.ada.com/careers",
+    "website_url": "https://www.ada.com",
+    "employee_count": null,
+    "industry": "Healthcare"
+  },
+  {
+    "name": "Weights & Biases",
+    "slug": "weights-biases",
+    "ats_platform": "ashby",
+    "careers_url": "https://www.wdb.com/careers",
+    "website_url": "https://www.wdb.com",
+    "employee_count": null,
+    "industry": "ML Infrastructure"
+  },
+  {
+    "name": "Langfuse",
+    "slug": "langfuse",
+    "ats_platform": "ashby",
+    "careers_url": "https://langfuse.com/careers",
+    "website_url": "https://langfuse.com",
+    "employee_count": null,
+    "industry": "LLMOps"
+  }
+]
