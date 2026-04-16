@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { JobPreferencesForm, type JobPreferencesData } from '@/components/forms/JobPreferencesForm'
+import { WORK_AUTHORIZATION_OPTIONS } from '@/lib/filters/workAuthorization'
 
 /**
  * Onboarding Page - 7 Step Wizard
@@ -609,12 +610,11 @@ function Step5AutofillProfile({ data, updateData }: {
             className="w-full px-4 py-2 border border-slate-300 rounded-lg"
           >
             <option value="">Select...</option>
-            <option value="US Citizen">US Citizen</option>
-            <option value="Green Card">Green Card</option>
-            <option value="H1-B">H1-B</option>
-            <option value="OPT">OPT</option>
-            <option value="EAD">EAD</option>
-            <option value="Other">Other</option>
+            {WORK_AUTHORIZATION_OPTIONS.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </div>
 
