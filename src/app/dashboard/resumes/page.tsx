@@ -52,9 +52,14 @@ async function getResumes(): Promise<{
     return { rawBase: null, masterOptimized: null, tailored: [] }
   }
 
-  const rawBase = resumes.find(r => r.type === 'raw_base' && r.is_current) || null
-  const masterOptimized = resumes.find(r => r.type === 'master_optimized' && r.is_current) || null
-  const tailored = resumes.filter(r => r.type === 'job_tailored')
+  // Sort by created_at DESC to get most recent first
+  const sortedResumes = resumes.sort((a, b) =>
+    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  )
+
+  const rawBase = sortedResumes.find(r => r.type === 'raw_base') || null
+  const masterOptimized = sortedResumes.find(r => r.type === 'master_optimized') || null
+  const tailored = sortedResumes.filter(r => r.type === 'job_tailored')
 
   return { rawBase, masterOptimized, tailored: tailored as Resume[] }
 }

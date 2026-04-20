@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { JobPreferencesForm, type JobPreferencesData } from '@/components/forms/JobPreferencesForm'
+import { WORK_AUTHORIZATION_OPTIONS } from '@/lib/filters/workAuthorization'
 
 /**
  * Onboarding Page - 7 Step Wizard
@@ -72,12 +73,13 @@ export default function OnboardingPage() {
       if (user) {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('experience_years')
+          .select('experience_years, onboarding_completed_at')
           .eq('id', user.id)
           .single()
 
-        // If profile exists and has onboarding data, redirect to dashboard
-        if (profile?.experience_years) {
+        // Redirect to dashboard if onboarding is completed
+        // (either has experience_years set OR has onboarding_completed_at timestamp)
+        if (profile?.experience_years || profile?.onboarding_completed_at) {
           router.push('/dashboard')
         }
       }
@@ -188,6 +190,9 @@ function Step1UploadResume({ data, updateData, nextStep, setError }: {
 }) {
   const [uploading, setUploading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
+  const [uploadSuccess, setUploadSuccess] = useState(false)
+  const [uploadedFile, setUploadedFile] = useState('')
+  const [parsedSkillsCount, setParsedSkillsCount] = useState(0)
 
   const handleFile = async (file: File) => {
     setUploading(true)
@@ -205,12 +210,15 @@ function Step1UploadResume({ data, updateData, nextStep, setError }: {
       const result = await response.json()
 
       if (result.success) {
+        setUploadedFile(file.name)
+        setParsedSkillsCount(result.parsedSkills?.length || 0)
+        setUploadSuccess(true)
         updateData({
           resumeId: result.resumeId,
           parsedText: result.parsedText,
           parsedSkills: result.parsedSkills
         })
-        nextStep()
+        // Don't call nextStep() - let user see success message first
       } else {
         setError(result.error || 'Failed to upload resume')
       }
@@ -240,35 +248,65 @@ function Step1UploadResume({ data, updateData, nextStep, setError }: {
         Upload your current resume (.docx or .pdf). We'll extract your skills and experience to help tailor future applications.
       </p>
 
-      <div
-        className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${
-          dragActive ? 'border-blue-500 bg-blue-50' : 'border-slate-300 hover:border-slate-400'
-        }`}
-        onDragEnter={(e) => { e.preventDefault(); setDragActive(true) }}
-        onDragLeave={(e) => { e.preventDefault(); setDragActive(false) }}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={handleDrop}
-      >
-        <input
-          type="file"
-          accept=".docx,.pdf,.doc"
-          onChange={handleChange}
-          disabled={uploading}
-          className="hidden"
-          id="resume-upload"
-        />
-        <label htmlFor="resume-upload" className="cursor-pointer">
-          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+      {uploadSuccess ? (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-8 text-center">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <p className="text-lg font-medium text-slate-900 mb-2">
-            {uploading ? 'Uploading...' : 'Drop your resume here, or click to browse'}
+          <h3 className="text-xl font-semibold text-green-900 mb-2">Resume uploaded!</h3>
+          <p className="text-green-700 mb-1">
+            Uploaded: <strong>{uploadedFile}</strong>
           </p>
-          <p className="text-sm text-slate-500">Supports .docx and .pdf files (max 5MB)</p>
-        </label>
-      </div>
+          <p className="text-sm text-green-600 mb-6">
+            We extracted {parsedSkillsCount} skill{parsedSkillsCount !== 1 ? 's' : ''} from your resume.
+          </p>
+          <button
+            onClick={nextStep}
+            className="px-8 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors"
+          >
+            Continue to Step 2 →
+          </button>
+        </div>
+      ) : (
+        <>
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+              {error}
+            </div>
+          )}
+          <div
+            className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${
+              dragActive ? 'border-blue-500 bg-blue-50' : 'border-slate-300 hover:border-slate-400'
+            }`}
+            onDragEnter={(e) => { e.preventDefault(); setDragActive(true) }}
+            onDragLeave={(e) => { e.preventDefault(); setDragActive(false) }}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={handleDrop}
+          >
+            <input
+              type="file"
+              accept=".docx,.pdf,.doc"
+              onChange={handleChange}
+              disabled={uploading}
+              className="hidden"
+              id="resume-upload"
+            />
+            <label htmlFor="resume-upload" className="cursor-pointer">
+              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+              </div>
+              <p className="text-lg font-medium text-slate-900 mb-2">
+                {uploading ? 'Uploading...' : 'Drop your resume here, or click to browse'}
+              </p>
+              <p className="text-sm text-slate-500">Supports .docx and .pdf files (max 5MB)</p>
+            </label>
+          </div>
+        </>
+      )}
     </div>
   )
 }
@@ -386,6 +424,7 @@ function Step3MasterOptimization({ data, updateData }: {
   const [optimizing, setOptimizing] = useState(false)
   const [optimizedText, setOptimizedText] = useState<string | null>(null)
   const [changeSummary, setChangeSummary] = useState<any>(null)
+  const supabase = createClient()
 
   const runOptimization = async () => {
     setOptimizing(true)
@@ -411,6 +450,19 @@ function Step3MasterOptimization({ data, updateData }: {
         setOptimizedText(result.optimizedText)
         setChangeSummary(result.changeSummary)
         updateData({ optimizedText: result.optimizedText })
+
+        // Save the master_optimized resume to database
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          await supabase.from('resumes').insert({
+            user_id: user.id,
+            type: 'master_optimized',
+            parsed_text: result.optimizedText,
+            parsed_skills: data.parsedSkills,
+            change_summary: result.changeSummary,
+            is_current: true
+          })
+        }
       } else {
         alert('Failed to optimize resume: ' + result.error)
       }
@@ -609,12 +661,11 @@ function Step5AutofillProfile({ data, updateData }: {
             className="w-full px-4 py-2 border border-slate-300 rounded-lg"
           >
             <option value="">Select...</option>
-            <option value="US Citizen">US Citizen</option>
-            <option value="Green Card">Green Card</option>
-            <option value="H1-B">H1-B</option>
-            <option value="OPT">OPT</option>
-            <option value="EAD">EAD</option>
-            <option value="Other">Other</option>
+            {WORK_AUTHORIZATION_OPTIONS.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -734,6 +785,7 @@ function Step6AnswerBank({ data, updateData }: {
 function Step7Complete({ data }: { data: OnboardingData }) {
   const router = useRouter()
   const [saving, setSaving] = useState(true)
+  const [redirecting, setRedirecting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -747,7 +799,14 @@ function Step7Complete({ data }: { data: OnboardingData }) {
 
         if (!user) throw new Error('Not authenticated')
 
-        // Prepare profile data with all preferences
+        // FIRST: Mark onboarding as completing (independent of preferences save)
+        // This provides a fallback flag if the preferences update fails
+        await supabase
+          .from('profiles')
+          .update({ onboarding_completed_at: new Date().toISOString() })
+          .eq('id', user.id)
+
+        // SECOND: Prepare and save profile data with all preferences
         const prefs = data.jobPreferences || {}
 
         const profileData = {
@@ -780,11 +839,21 @@ function Step7Complete({ data }: { data: OnboardingData }) {
           .update(profileData)
           .eq('id', user.id)
 
-        if (updateError) throw updateError
+        if (updateError) {
+          console.error('Profile save error:', updateError)
+          // If preferences fail, at least save experience_years as fallback
+          // This ensures the onboarding check passes
+          await supabase
+            .from('profiles')
+            .update({ experience_years: prefs.experience_years || 0 })
+            .eq('id', user.id)
+          throw updateError
+        }
 
         setSaving(false)
       } catch (err: any) {
-        setError(err.message || 'Failed to save profile')
+        console.error('Onboarding save error:', err)
+        setError(err.message || 'Failed to save profile. Please try again.')
         setSaving(false)
       }
     }
@@ -820,6 +889,11 @@ function Step7Complete({ data }: { data: OnboardingData }) {
     )
   }
 
+  const handleGoToDashboard = () => {
+    setRedirecting(true)
+    router.push('/dashboard')
+  }
+
   return (
     <div className="bg-white rounded-2xl p-8 shadow-sm text-center">
       <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -832,10 +906,22 @@ function Step7Complete({ data }: { data: OnboardingData }) {
         Your co-pilot is ready. Let's find your next job.
       </p>
       <button
-        onClick={() => router.push('/dashboard')}
-        className="px-8 py-4 bg-blue-600 text-white rounded-xl font-semibold text-lg hover:bg-blue-700"
+        onClick={handleGoToDashboard}
+        disabled={redirecting}
+        className={`px-8 py-4 text-white rounded-xl font-semibold text-lg transition-colors ${
+          redirecting
+            ? 'bg-slate-400 cursor-not-allowed'
+            : 'bg-blue-600 hover:bg-blue-700'
+        }`}
       >
-        Go to Dashboard
+        {redirecting ? (
+          <span className="flex items-center gap-2">
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            Redirecting to dashboard...
+          </span>
+        ) : (
+          'Go to Dashboard'
+        )}
       </button>
     </div>
   )

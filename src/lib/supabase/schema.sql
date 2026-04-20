@@ -415,3 +415,28 @@ ALTER TABLE profiles DROP COLUMN IF EXISTS us_citizen_only_filter;
 -- - show_clearance_jobs (new)
 -- - only_show_sponsoring (new)
 -- - work_authorization (already existed)
+
+-- ============================================================================
+-- MIGRATION: Ensure only one is_current resume per type per user
+-- ============================================================================
+-- This migration adds a unique constraint to prevent multiple is_current resumes
+-- of the same type for the same user, and cleans up any existing duplicates.
+-- ============================================================================
+
+-- First, update any duplicate is_current resumes to keep only the most recent one
+WITH ranked_resumes AS (
+  SELECT id, user_id, type,
+    ROW_NUMBER() OVER (PARTITION BY user_id, type ORDER BY created_at DESC) as rn
+  FROM resumes WHERE is_current = true
+)
+UPDATE resumes
+SET is_current = false
+WHERE id IN (SELECT id FROM ranked_resumes WHERE rn > 1);
+
+-- Add unique index to prevent future duplicates
+DROP INDEX IF EXISTS idx_resumes_unique_current_type;
+CREATE UNIQUE INDEX idx_resumes_unique_current_type
+  ON resumes (user_id, type)
+  WHERE (is_current = true);
+
+-- Migration complete! Now only one resume per type can be is_current=true per user
