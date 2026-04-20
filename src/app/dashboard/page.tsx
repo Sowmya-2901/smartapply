@@ -1,5 +1,6 @@
 import { formatDistanceToNow } from 'date-fns'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { calculateMatchScore } from '@/lib/filters/synonyms'
@@ -46,6 +47,7 @@ async function getJobs(limit: number = 50): Promise<{
   stats: Stats
   userHasResume: boolean
   matchScores: Map<string, number>
+  needsOnboarding?: boolean
 }> {
   'use server'
   const supabase = createAdminClient()
@@ -81,6 +83,7 @@ async function getJobs(limit: number = 50): Promise<{
       .from('profiles')
       .select(`
         experience_years,
+        onboarding_completed_at,
         job_titles,
         seniority_preferences,
         no_new_grad,
@@ -99,6 +102,12 @@ async function getJobs(limit: number = 50): Promise<{
       `)
       .eq('id', user.id)
       .single()
+
+    // Check if user completed onboarding
+    if (!profileData?.onboarding_completed_at && !profileData?.experience_years) {
+      // User hasn't completed onboarding, redirect to onboarding
+      return { jobs: [], stats: { newToday: 0, applied: 0, saved: 0, avgMatch: 0 }, userHasResume: false, matchScores: new Map(), needsOnboarding: true }
+    }
 
     profile = profileData
     userExperience = profile?.experience_years || 0
@@ -358,7 +367,12 @@ export default async function JobFeedPage({
     search?: string
   }
 }) {
-  const { jobs, stats, userHasResume, matchScores } = await getJobs()
+  const { jobs, stats, userHasResume, matchScores, needsOnboarding } = await getJobs()
+
+  // Redirect to onboarding if needed
+  if (needsOnboarding) {
+    redirect('/onboarding')
+  }
 
   // Attach match scores to jobs
   const jobsWithScores: JobCardProps[] = jobs.map((job: Job) => ({

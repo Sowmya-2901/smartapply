@@ -117,7 +117,7 @@ export default function OnboardingPage() {
       case 3:
         return <Step3MasterOptimization data={data} updateData={updateData} />
       case 4:
-        return <Step4JobPreferences data={data} updateData={updateData} />
+        return <Step4JobPreferences data={data} updateData={updateData} onNextStep={nextStep} />
       case 5:
         return <Step5AutofillProfile data={data} updateData={updateData} />
       case 6:
@@ -525,9 +525,10 @@ function Step3MasterOptimization({ data, updateData }: {
 // ============================================================================
 // STEP 4: Job Search Preferences
 // ============================================================================
-function Step4JobPreferences({ data, updateData }: {
+function Step4JobPreferences({ data, updateData, onNextStep }: {
   data: OnboardingData
   updateData: (updates: Partial<OnboardingData>) => void
+  onNextStep: () => void
 }) {
   const [saving, setSaving] = useState(false)
 
@@ -535,6 +536,8 @@ function Step4JobPreferences({ data, updateData }: {
     setSaving(true)
     // Update parent state with new preferences
     updateData({ jobPreferences: preferences })
+    // Automatically advance to next step after saving
+    setTimeout(() => onNextStep(), 300)
     setSaving(false)
   }
 
@@ -799,17 +802,13 @@ function Step7Complete({ data }: { data: OnboardingData }) {
 
         if (!user) throw new Error('Not authenticated')
 
-        // FIRST: Mark onboarding as completing (independent of preferences save)
-        // This provides a fallback flag if the preferences update fails
-        await supabase
-          .from('profiles')
-          .update({ onboarding_completed_at: new Date().toISOString() })
-          .eq('id', user.id)
-
-        // SECOND: Prepare and save profile data with all preferences
+        // Prepare profile data with all preferences
         const prefs = data.jobPreferences || {}
 
         const profileData = {
+          // Mark onboarding as complete
+          onboarding_completed_at: new Date().toISOString(),
+
           // Resume rules
           formatting_rules: data.formattingRules,
           content_rules: data.contentRules,
@@ -834,6 +833,7 @@ function Step7Complete({ data }: { data: OnboardingData }) {
           freshness_preference: prefs.freshness_preference || '7days'
         }
 
+        // Single update with all data including onboarding_completed_at
         const { error: updateError } = await supabase
           .from('profiles')
           .update(profileData)
@@ -841,13 +841,7 @@ function Step7Complete({ data }: { data: OnboardingData }) {
 
         if (updateError) {
           console.error('Profile save error:', updateError)
-          // If preferences fail, at least save experience_years as fallback
-          // This ensures the onboarding check passes
-          await supabase
-            .from('profiles')
-            .update({ experience_years: prefs.experience_years || 0 })
-            .eq('id', user.id)
-          throw updateError
+          throw new Error(`Failed to save profile: ${updateError.message}`)
         }
 
         setSaving(false)
