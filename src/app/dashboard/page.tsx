@@ -404,22 +404,6 @@ export default async function JobFeedPage({
 
       {/* Manual Job Fetch Button */}
       <JobFetchButton />
-        <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">📄</span>
-            <div>
-              <p className="font-medium text-amber-900">Upload your resume to see your match scores</p>
-              <p className="text-sm text-amber-700">We'll analyze your skills and show how well you match each job</p>
-            </div>
-          </div>
-          <Link
-            href="/onboarding"
-            className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium text-sm"
-          >
-            Complete Onboarding
-          </Link>
-        </div>
-      )}
 
       {/* Stats Bar */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
