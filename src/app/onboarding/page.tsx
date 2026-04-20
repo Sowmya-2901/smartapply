@@ -111,7 +111,7 @@ export default function OnboardingPage() {
   const renderStep = () => {
     switch (currentStep) {
       case 1:
-        return <Step1UploadResume data={data} updateData={updateData} nextStep={nextStep} setError={setError} />
+        return <Step1UploadResume data={data} updateData={updateData} nextStep={nextStep} setError={setError} error={error} />
       case 2:
         return <Step2ResumeRules data={data} updateData={updateData} />
       case 3:
@@ -182,11 +182,12 @@ export default function OnboardingPage() {
 // ============================================================================
 // STEP 1: Upload Resume
 // ============================================================================
-function Step1UploadResume({ data, updateData, nextStep, setError }: {
+function Step1UploadResume({ data, updateData, nextStep, setError, error }: {
   data: OnboardingData
   updateData: (updates: Partial<OnboardingData>) => void
   nextStep: () => void
   setError: (error: string | null) => void
+  error?: string | null
 }) {
   const [uploading, setUploading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
